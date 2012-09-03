@@ -134,6 +134,10 @@ module Context = struct
 	type t
 end
 
+module Command_queue = struct
+	type t
+end
+
 module Platform_info = struct
 	type t =
 	| PROFILE
@@ -239,6 +243,12 @@ module Context_properties = struct
 	| CONTEXT_INTEROP_USER_SYNC of bool
 end
 
+module Command_queue_properties = struct
+	type t =
+	| CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
+	| CL_QUEUE_PROFILING_ENABLE
+end
+
 exception Cl_error of Cl_error.t
 let _ = Callback.register_exception "Cl_error" (Cl_error Cl_error.SUCCESS)
 
@@ -252,3 +262,6 @@ external get_device_info : Device_id.t -> 'a Device_info.t -> 'a
 	= "caml_get_device_info"
 external create_context : Context_properties.t list -> Device_id.t list
 	-> (string -> int64 -> int64 -> unit) -> Context.t = "caml_create_context"
+external create_command_queue : Context.t -> Device_id.t
+	-> Command_queue_properties.t list -> Command_queue.t
+	= "caml_create_command_queue"

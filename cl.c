@@ -40,33 +40,50 @@ cl_platform_info cl_platform_info_val(value platform_info)
 
 cl_device_type cl_device_type_val(value v)
 {
-	value h, t;
-	cl_device_type device_type;
-	
-	if (Is_long(v))
+	CAMLlocal1(h);
+	cl_device_type device_type = 0;
+
+	while (Is_block(v))
 	{
-		assert(Int_val(v) == 0);
-		return 0;
-	}
-	else
-	{
-		assert(Is_block(v));
 		assert(Tag_val(v) == 0);
 		h = Field(v, 0);
-		t = Field(v, 1);
+		v = Field(v, 1);
 		assert(Is_long(h));
 		switch (Long_val(h))
 		{
-			case 0: device_type = 1 << 0; break;
-			case 1: device_type = 1 << 1; break;
-			case 2: device_type = 1 << 2; break;
-			case 3: device_type = 1 << 3; break;
-			case 4: device_type = 1 << 4; break;
-			case 5: device_type = -1; break;
+			case 0: device_type |= 1 << 0; break;
+			case 1: device_type |= 1 << 1; break;
+			case 2: device_type |= 1 << 2; break;
+			case 3: device_type |= 1 << 3; break;
+			case 4: device_type |= 1 << 4; break;
+			case 5: device_type |= -1; break;
 			default: caml_failwith("unrecognized device type");
 		}
-		return device_type | cl_device_type_val(t);
 	}
+	assert(Int_val(v) == 0);
+	return device_type;
+}
+
+cl_command_queue_properties cl_command_queue_properties_val(value v)
+{
+	CAMLlocal1(h);
+	cl_command_queue_properties command_queue_properties = 0;
+
+	while (Is_block(v))
+	{
+		assert(Tag_val(v) == 0);
+		h = Field(v, 0);
+		v = Field(v, 1);
+		assert(Is_long(h));
+		switch (Long_val(h))
+		{
+			case 0: command_queue_properties |= 1 << 0; break;
+			case 1: command_queue_properties |= 1 << 1; break;
+			default: caml_failwith("unrecognized Command_queueu_properties");
+		}
+	}
+	assert(Int_val(v) == 0);
+	return command_queue_properties;
 }
 
 void raise_cl_error(cl_int error)
@@ -299,4 +316,26 @@ value caml_create_context(value caml_properties, value caml_devices,
 	caml_context = caml_copy_nativeint(context);
 	
 	CAMLreturn(caml_context);
+}
+
+value caml_create_command_queue(value caml_context, value caml_device,
+	value caml_properties)
+{
+	CAMLparam3(caml_context, caml_device, caml_properties);
+	
+	CAMLlocal1(caml_command_queue);
+	cl_context context;
+	cl_device_id device;
+	cl_command_queue_properties properties;
+	cl_int errcode;
+	cl_command_queue command_queue;
+	
+	context = (cl_context) Nativeint_val(caml_context);
+	device = (cl_device_id) Nativeint_val(caml_device);
+	properties = cl_command_queue_properties_val(caml_properties);
+	command_queue = clCreateCommandQueue(context, device, properties, &errcode);
+	raise_cl_error(errcode);
+	caml_command_queue = caml_copy_nativeint(command_queue);
+	
+	CAMLreturn(caml_command_queue);
 }

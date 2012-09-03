@@ -14,7 +14,8 @@ let () =
 		let name = Cl.get_device_info device Cl.Device_info.name in
 		Printf.printf "%s\n%!" name;
 		let pfn_notify errinfo _ _ = Printf.printf "pfn_notify %s\n%!" errinfo in
-		let _context = Cl.create_context [] [device] pfn_notify in
+		let context = Cl.create_context [] [device] pfn_notify in
+		let _command_queue = Cl.create_command_queue context device [] in
 		()
 	with Cl.Cl_error cl_error ->
 		Printf.printf "error %s.\n" (Cl.Cl_error.to_string cl_error)
