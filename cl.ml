@@ -130,6 +130,10 @@ module Device_id = struct
 	type t
 end
 
+module Context = struct
+	type t
+end
+
 module Platform_info = struct
 	type t =
 	| PROFILE
@@ -246,3 +250,5 @@ external get_device_ids : Platform_id.t -> Device_type.t list
 	-> Device_id.t array = "caml_get_device_ids"
 external get_device_info : Device_id.t -> 'a Device_info.t -> 'a
 	= "caml_get_device_info"
+external create_context : Context_properties.t list -> Device_id.t list
+	-> (string -> int64 -> int64 -> unit) -> Context.t = "caml_create_context"

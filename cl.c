@@ -85,9 +85,9 @@ value caml_get_platform_ids(value unit)
 {
 	CAMLparam1(unit);
 	
+	CAMLlocal1(caml_platforms);
 	cl_uint num_platforms;
 	cl_platform_id* platforms;
-	value caml_platforms;
 	int i;
 	
 	raise_cl_error(clGetPlatformIDs(0, NULL, &num_platforms));
@@ -98,7 +98,7 @@ value caml_get_platform_ids(value unit)
 	caml_platforms = caml_alloc_tuple(num_platforms);
 	for (i = 0; i < num_platforms; i++)
 	{
-		Store_field(caml_platforms, i, caml_copy_int32(platforms[i]));
+		Store_field(caml_platforms, i, caml_copy_nativeint(platforms[i]));
 	}
 	free(platforms);
 	
@@ -109,13 +109,13 @@ value caml_get_platform_info(value caml_platform, value caml_param_name)
 {
 	CAMLparam2(caml_platform, caml_param_name);
 	
+	CAMLlocal1(caml_param_value);
 	cl_platform_id platform;
 	cl_platform_info param_name;
 	size_t param_value_size;
 	char* param_value;
-	value caml_param_value;
 	
-	platform = (cl_platform_id) Int32_val(caml_platform);
+	platform = (cl_platform_id) Nativeint_val(caml_platform);
 	param_name = cl_platform_info_val(caml_param_name);
 	raise_cl_error(
 		clGetPlatformInfo(platform, param_name, 0, NULL, &param_value_size));
@@ -135,14 +135,14 @@ value caml_get_device_ids(value caml_platform, value caml_device_type)
 {
 	CAMLparam2(caml_platform, caml_device_type);
 	
+	CAMLlocal1(caml_devices);
 	cl_platform_id platform;
 	cl_device_type device_type;
 	cl_uint num_devices;
 	cl_device_id* devices;
-	value caml_devices;
 	int i;
 
-	platform = (cl_platform_id) Int32_val(caml_platform);
+	platform = (cl_platform_id) Nativeint_val(caml_platform);
 	device_type = cl_device_type_val(caml_device_type);
 	raise_cl_error(clGetDeviceIDs(platform, device_type, 0, NULL, &num_devices));
 	devices = calloc(num_devices, sizeof(cl_device_id));
@@ -153,7 +153,7 @@ value caml_get_device_ids(value caml_platform, value caml_device_type)
 	caml_devices = caml_alloc_tuple(num_devices);
 	for (i = 0; i < num_devices; i++)
 	{
-		Store_field(caml_devices, i, caml_copy_int32(devices[i]));
+		Store_field(caml_devices, i, caml_copy_nativeint(devices[i]));
 	}
 	free(devices);
 	
@@ -164,13 +164,13 @@ value caml_get_device_info(value caml_device, value caml_param_name)
 {
 	CAMLparam2(caml_device, caml_param_name);
 	
+	CAMLlocal1(caml_param_value);
 	cl_device_id device;
 	cl_device_info param_name;
 	size_t param_value_size;
 	void* param_value;
-	value caml_param_value;
 	
-	device = (cl_device_id) Int32_val(caml_device);
+	device = (cl_device_id) Nativeint_val(caml_device);
 	param_name = Int_val(caml_param_name);
 	raise_cl_error(
 		clGetDeviceInfo(device, param_name, 0, NULL, &param_value_size));
@@ -204,9 +204,9 @@ int list_length(value v)
 
 cl_context_properties* cl_context_properties_val(value v)
 {
-	cl_context_properties* properties;
+	CAMLlocal2(h, caml_val);
+	cl_context_properties *properties;
 	int i, l;
-	value h, caml_val;
 	cl_context_properties p, val;
 	
 	l = list_length(v);
@@ -222,7 +222,7 @@ cl_context_properties* cl_context_properties_val(value v)
 		caml_val = Field(h, 0);
 		switch (Tag_val(h))
 		{
-			case 0: p = CL_CONTEXT_PLATFORM; val = cl_platform_id_val(caml_val);
+			case 0: p = CL_CONTEXT_PLATFORM; val = Nativeint_val(caml_val);
 				break;
 			case 1: p = CL_CONTEXT_INTEROP_USER_SYNC; val = Bool_val(caml_val); break;
 			default: caml_failwith("unrecognized context properties");
@@ -234,25 +234,69 @@ cl_context_properties* cl_context_properties_val(value v)
 	return properties;
 }
 
+static value *caml_pfn_notifies = NULL;
+
+void CL_CALLBACK pfn_notify(
+	const char *errinfo,
+	const void *private_info,
+	size_t cb,
+	void *user_data)
+{
+	CAMLlocal4(caml_pfn_notify, caml_errinfo, caml_private_info, caml_cb);
+	
+	caml_pfn_notify = Field(*caml_pfn_notifies, (int) user_data);
+	caml_errinfo = caml_copy_string(errinfo);
+	caml_private_info = caml_copy_nativeint(private_info);
+	caml_cb = caml_copy_nativeint(cb);
+	caml_callback3(caml_pfn_notify, caml_errinfo, caml_private_info, caml_cb);
+}
+
+void array_add(value **array, value *element)
+{
+	CAMLlocal1(new_array);
+	int i, length;
+	
+	length = *array != NULL ? Wosize_val(*array) : 0;
+	new_array = caml_alloc_tuple(length + 1);
+	caml_register_generational_global_root(&new_array);
+	for (i = 0; i < length; i++)
+		Store_field(new_array, i, Field(**array, i));
+	Store_field(new_array, length, *element);
+	if (*array != NULL)
+		caml_remove_generational_global_root(*array);
+	*array = &new_array;
+}
+
 value caml_create_context(value caml_properties, value caml_devices,
 	value caml_pfn_notify, value caml_user_data)
 {
 	CAMLparam4(caml_properties, caml_devices, caml_pfn_notify, caml_user_data);
 	
+	CAMLlocal1(caml_context);
+	value *tmp;
 	cl_context_properties* properties;
 	cl_uint num_devices;
 	cl_device_id* devices;
-	void CL_CALLBACK pfn_notify;
 	void* user_data;
 	cl_int errcode;
 	int i;
+	cl_context context;
 	
 	properties = cl_context_properties_val(caml_properties);
 	num_devices = list_length(caml_devices);
 	devices = calloc(num_devices, sizeof(cl_device_id));
 	for (i = 0; Is_block(caml_devices); i++)
 	{
-		devices[i] = (cl_device_id) Int32_val(Field(caml_devices, 0));
+		devices[i] = (cl_device_id) Nativeint_val(Field(caml_devices, 0));
 		caml_devices = Field(caml_devices, 1);
 	}
+	// Store caml_pfn_notify so that it doesn't get garbage collected
+	array_add(&caml_pfn_notifies, &caml_pfn_notify);
+	user_data = (void*) Wosize_val(*caml_pfn_notifies);
+	context = clCreateContext(
+		properties, num_devices, devices, &pfn_notify, user_data, &errcode);
+	raise_cl_error(errcode);
+	caml_context = caml_copy_nativeint(context);
+	
+	CAMLreturn(caml_context);
 }
