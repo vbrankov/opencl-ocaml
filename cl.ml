@@ -138,6 +138,10 @@ module Command_queue = struct
 	type t
 end
 
+module Program = struct
+	type t
+end
+
 module Platform_info = struct
 	type t =
 	| PROFILE
@@ -249,6 +253,19 @@ module Command_queue_properties = struct
 	| CL_QUEUE_PROFILING_ENABLE
 end
 
+module Mem_flags = struct
+	type t =
+  | CL_MEM_READ_WRITE
+  | CL_MEM_WRITE_ONLY
+  | CL_MEM_READ_ONLY
+  | CL_MEM_USE_HOST_PTR
+  | CL_MEM_ALLOC_HOST_PTR
+  | CL_MEM_COPY_HOST_PTR
+  | CL_MEM_HOST_WRITE_ONLY
+  | CL_MEM_HOST_READ_ONLY
+  | CL_MEM_HOST_NO_ACCESS
+end
+
 exception Cl_error of Cl_error.t
 let _ = Callback.register_exception "Cl_error" (Cl_error Cl_error.SUCCESS)
 
@@ -265,3 +282,6 @@ external create_context : Context_properties.t list -> Device_id.t list
 external create_command_queue : Context.t -> Device_id.t
 	-> Command_queue_properties.t list -> Command_queue.t
 	= "caml_create_command_queue"
+external create_program_with_source : Context.t -> string list -> Program.t
+	= "caml_create_program_with_source"
+	

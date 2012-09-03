@@ -86,6 +86,52 @@ cl_command_queue_properties cl_command_queue_properties_val(value v)
 	return command_queue_properties;
 }
 
+cl_mem_flags cl_mem_flags_val(value v)
+{
+	CAMLlocal1(h);
+	cl_mem_flags mem_flags = 0;
+
+	while (Is_block(v))
+	{
+		assert(Tag_val(v) == 0);
+		h = Field(v, 0);
+		v = Field(v, 1);
+		assert(Is_long(h));
+		switch (Long_val(h))
+		{
+			case 0: mem_flags |= 1 << 0; break;
+			case 1: mem_flags |= 1 << 1; break;
+			case 2: mem_flags |= 1 << 2; break;
+			case 3: mem_flags |= 1 << 3; break;
+			case 4: mem_flags |= 1 << 4; break;
+			case 5: mem_flags |= 1 << 5; break;
+			case 6: mem_flags |= 1 << 7; break;
+			case 7: mem_flags |= 1 << 8; break;
+			case 8: mem_flags |= 1 << 9; break;
+			default: caml_failwith("unrecognized Mem_flags");
+		}
+	}
+	assert(Int_val(v) == 0);
+	return mem_flags;
+}
+
+const char** char_array_array_val(value v)
+{
+	const char** s;
+	int i;
+	
+	s = malloc(list_length(v));
+	if (s == NULL)
+		caml_failwith("malloc error");
+	for (i = 0; Is_block(v); i++)
+	{
+		assert(Tag_val(v) == 0);
+		s[i] = String_val(Field(v, 0));
+		v = Field(v, 1);
+	}
+	return s;
+}
+
 void raise_cl_error(cl_int error)
 {
 	value* exception;
@@ -338,4 +384,25 @@ value caml_create_command_queue(value caml_context, value caml_device,
 	caml_command_queue = caml_copy_nativeint(command_queue);
 	
 	CAMLreturn(caml_command_queue);
+}
+
+value caml_create_program_with_source(value caml_context, value caml_strings)
+{
+	CAMLparam2(caml_context, caml_strings);
+	
+	CAMLlocal1(caml_program);
+	cl_context context;
+	cl_uint count;
+	const char** strings;
+	cl_int errcode;
+	cl_program program;
+	
+	context = (cl_context) Nativeint_val(caml_context);
+	count = list_length(caml_strings);
+	strings = char_array_array_val(caml_strings);
+	program = clCreateProgramWithSource(context, count, strings, NULL, &errcode);
+	raise_cl_error(errcode);
+	caml_program = caml_copy_nativeint(program);
+	
+	CAMLreturn(caml_program);
 }

@@ -16,6 +16,19 @@ let () =
 		let pfn_notify errinfo _ _ = Printf.printf "pfn_notify %s\n%!" errinfo in
 		let context = Cl.create_context [] [device] pfn_notify in
 		let _command_queue = Cl.create_command_queue context device [] in
+		let _program = Cl.create_program_with_source context ["
+			__kernel void vector_add_gpu (
+				__global const float* src_a,
+        __global const float* src_b,
+        __global float* res,
+		    const int num)
+			{
+				const int idx = get_global_id(0);
+
+				if (idx < num)
+					res[idx] = src_a[idx] + src_b[idx];
+			}"]
+		in
 		()
 	with Cl.Cl_error cl_error ->
 		Printf.printf "error %s.\n" (Cl.Cl_error.to_string cl_error)
