@@ -150,6 +150,10 @@ module Mem = struct
 	type t
 end
 
+module Event = struct
+	type t
+end
+
 module Platform_info = struct
 	type t =
 	| PROFILE
@@ -348,3 +352,8 @@ external create_buffer : Context.t -> Mem_flags.t list -> Host.t -> Mem.t
 	= "caml_create_buffer"
 external set_kernel_arg : Kernel.t -> int -> Arg_value.t -> unit
 	= "caml_set_kernel_arg"
+(* XXX Those [int array]s should probably be lists. *)
+external enqueue_nd_range_kernel : Command_queue.t -> Kernel.t
+	-> int array option -> int array -> int array option
+	-> Event.t = "caml_enqueue_nd_range_kernel_bytecode"
+	"caml_enqueue_nd_range_kernel_native"
