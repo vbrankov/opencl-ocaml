@@ -605,3 +605,35 @@ value caml_create_buffer(value caml_context, value caml_flags, value caml_host)
 	
 	CAMLreturn(caml_mem);
 }
+
+value caml_set_kernel_arg(value caml_kernel, value caml_arg_index,
+	value caml_arg_value)
+{
+	CAMLparam3(caml_kernel, caml_arg_index, caml_arg_value);
+	
+	CAMLlocal1(data);
+	cl_kernel kernel;
+	cl_uint arg_index;
+	size_t arg_size;
+	int arg_value;
+	
+	kernel = (cl_kernel) Nativeint_val(caml_kernel);
+	arg_index = Int_val(caml_arg_index);
+	data = Field(caml_arg_value, 0);
+	switch (Tag_val(caml_arg_value))
+	{
+		case 0:
+			arg_size = sizeof(int);
+			arg_value = Int_val(data);
+			break;
+		case 1:
+			arg_size = sizeof(cl_mem);
+			arg_value = Nativeint_val(data);
+			break;
+		default:
+			caml_failwith("unrecognized Arg_value");
+	}
+	raise_cl_error(clSetKernelArg(kernel, arg_index, arg_size, &arg_value));
+	
+	CAMLreturn(Val_unit);
+}

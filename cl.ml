@@ -313,6 +313,14 @@ module Host = struct
 	| DOUBLE_INIT of float array
 end
 
+module Arg_value = struct
+	(* XXX Not all possible arguments are implemented *)
+	type t =
+	| INT of int
+	(* XXX We should probaby have Mem.t parametrized for type safety *)
+	| ARRAY_DOUBLE of Mem.t
+end
+
 exception Cl_error of Cl_error.t
 let _ = Callback.register_exception "Cl_error" (Cl_error Cl_error.SUCCESS)
 
@@ -338,3 +346,5 @@ external get_program_build_info : Program.t -> Device_id.t
 external create_kernel : Program.t -> string -> Kernel.t = "caml_create_kernel"
 external create_buffer : Context.t -> Mem_flags.t list -> Host.t -> Mem.t
 	= "caml_create_buffer"
+external set_kernel_arg : Kernel.t -> int -> Arg_value.t -> unit
+	= "caml_set_kernel_arg"

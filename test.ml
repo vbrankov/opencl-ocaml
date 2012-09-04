@@ -42,21 +42,25 @@ let () =
 		in
 		Printf.printf "%s %s\n%!" build_log
 			(Cl.Build_status.to_string build_status);
-		let _kernel = Cl.create_kernel program "vector_add_gpu" in
+		let kernel = Cl.create_kernel program "vector_add_gpu" in
 		let size = 123 in
 		let src_a_h = Array.init size float_of_int in
 		let src_b_h = Array.init size float_of_int in
-		let _src_a_d = Cl.create_buffer context
+		let src_a_d = Cl.create_buffer context
 			[Cl.Mem_flags.READ_ONLY; Cl.Mem_flags.COPY_HOST_PTR]
 			(Cl.Host.DOUBLE_INIT src_a_h)
 		in
-		let _src_b_d = Cl.create_buffer context
+		let src_b_d = Cl.create_buffer context
 			[Cl.Mem_flags.READ_ONLY; Cl.Mem_flags.COPY_HOST_PTR]
 			(Cl.Host.DOUBLE_INIT src_b_h)
 		in
-		let _res_d = Cl.create_buffer context [Cl.Mem_flags.WRITE_ONLY]
+		let res_d = Cl.create_buffer context [Cl.Mem_flags.WRITE_ONLY]
 			(Cl.Host.DOUBLE size)
 		in
+		Cl.set_kernel_arg kernel 0 (Cl.Arg_value.ARRAY_DOUBLE src_a_d);
+		Cl.set_kernel_arg kernel 1 (Cl.Arg_value.ARRAY_DOUBLE src_b_d);
+		Cl.set_kernel_arg kernel 2 (Cl.Arg_value.ARRAY_DOUBLE res_d);
+		Cl.set_kernel_arg kernel 0 (Cl.Arg_value.INT size);
 		()
 	with Cl.Cl_error cl_error ->
 		Printf.printf "error %s.\n" (Cl.Cl_error.to_string cl_error)
