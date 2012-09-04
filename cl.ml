@@ -266,6 +266,38 @@ module Mem_flags = struct
   | CL_MEM_HOST_NO_ACCESS
 end
 
+module Build_status = struct
+	type t =
+	| SUCCESS
+	| NONE
+	| ERROR
+	| IN_PROGRESS
+	
+	let to_string = function
+	| SUCCESS     -> "SUCCESS"
+	| NONE        -> "NONE"
+	| ERROR       -> "ERROR"
+	| IN_PROGRESS -> "IN_PROGRESS"
+end
+
+module Program_binary_type = struct
+	type t =
+  | NONE
+  | COMPILED_OBJECT
+  | LIBRARY
+  | EXECUTABLE
+end
+
+module Program_build_info = struct
+	type 'a t = int
+	
+	(* XXX All values where ['a] is [unit] are unfinished *)
+  let build_status                      : Build_status.t t = 0x1181
+  let build_options                     : string t = 0x1182
+  let build_log                         : string t = 0x1183
+  let binary_type                       : Program_binary_type.t t = 0x1184
+end
+
 exception Cl_error of Cl_error.t
 let _ = Callback.register_exception "Cl_error" (Cl_error Cl_error.SUCCESS)
 
@@ -284,4 +316,7 @@ external create_command_queue : Context.t -> Device_id.t
 	= "caml_create_command_queue"
 external create_program_with_source : Context.t -> string list -> Program.t
 	= "caml_create_program_with_source"
-	
+external build_program : Program.t -> Device_id.t list -> string
+	-> (Program.t -> unit) -> unit = "caml_build_program"
+external get_program_build_info : Program.t -> Device_id.t
+	-> 'a Program_build_info.t -> 'a = "caml_get_program_build_info"

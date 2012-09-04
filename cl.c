@@ -132,6 +132,47 @@ const char** char_array_array_val(value v)
 	return s;
 }
 
+cl_device_id* cl_device_id_val(value v)
+{
+	cl_device_id* d;
+	int i;
+	
+	d = calloc(list_length(v), sizeof(cl_device_id));
+	if (d == NULL)
+		caml_failwith("calloc error");
+	for (i = 0; Is_block(v); i++)
+	{
+		assert(Tag_val(v) == 0);
+		d[i] = (cl_device_id) Nativeint_val(Field(v, 0));
+		v = Field(v, 1);
+	}
+	return d;
+}
+
+value val_cl_build_status(cl_build_status s)
+{
+	switch (s)
+	{
+    case CL_BUILD_SUCCESS    : return Val_int(0);
+    case CL_BUILD_NONE       : return Val_int(1);
+    case CL_BUILD_ERROR      : return Val_int(2);
+    case CL_BUILD_IN_PROGRESS: return Val_int(3);
+		default: caml_failwith("unrecognized Build_status");
+	}
+}
+
+value val_cl_program_binary_type(cl_program_binary_type t)
+{
+	switch (t)
+	{
+    case CL_PROGRAM_BINARY_TYPE_NONE           : return Val_int(0);
+    case CL_PROGRAM_BINARY_TYPE_COMPILED_OBJECT: return Val_int(1);
+    case CL_PROGRAM_BINARY_TYPE_LIBRARY        : return Val_int(2);
+    case CL_PROGRAM_BINARY_TYPE_EXECUTABLE     : return Val_int(3);
+		default: caml_failwith("unrecognized Program_binary_type");
+	}
+}
+
 void raise_cl_error(cl_int error)
 {
 	value* exception;
@@ -151,13 +192,17 @@ value caml_get_platform_ids(value unit)
 	CAMLlocal1(caml_platforms);
 	cl_uint num_platforms;
 	cl_platform_id* platforms;
+	cl_int errcode;
 	int i;
 	
 	raise_cl_error(clGetPlatformIDs(0, NULL, &num_platforms));
 	platforms = calloc(num_platforms, sizeof(cl_platform_id));
 	if (platforms == NULL)
 		caml_failwith("calloc error");
-	raise_cl_error(clGetPlatformIDs(num_platforms, platforms, NULL));
+	errcode = clGetPlatformIDs(num_platforms, platforms, NULL);
+	if (errcode != CL_SUCCESS)
+		free(platforms);
+	raise_cl_error(errcode);
 	caml_platforms = caml_alloc_tuple(num_platforms);
 	for (i = 0; i < num_platforms; i++)
 	{
@@ -177,6 +222,7 @@ value caml_get_platform_info(value caml_platform, value caml_param_name)
 	cl_platform_info param_name;
 	size_t param_value_size;
 	char* param_value;
+	cl_int errcode;
 	
 	platform = (cl_platform_id) Nativeint_val(caml_platform);
 	param_name = cl_platform_info_val(caml_param_name);
@@ -185,9 +231,11 @@ value caml_get_platform_info(value caml_platform, value caml_param_name)
 	param_value = calloc(param_value_size, sizeof(char));
 	if (param_value == NULL)
 		caml_failwith("calloc error");
-	raise_cl_error(
-		clGetPlatformInfo(platform, param_name, param_value_size, param_value, NULL)
-	);
+	errcode = clGetPlatformInfo(platform, param_name, param_value_size, param_value,
+		NULL);
+	if (errcode != CL_SUCCESS)
+		free(param_value);
+	raise_cl_error(errcode);
 	caml_param_value = caml_copy_string(param_value);
 	free(param_value);
 	
@@ -203,6 +251,7 @@ value caml_get_device_ids(value caml_platform, value caml_device_type)
 	cl_device_type device_type;
 	cl_uint num_devices;
 	cl_device_id* devices;
+	cl_int errcode;
 	int i;
 
 	platform = (cl_platform_id) Nativeint_val(caml_platform);
@@ -211,8 +260,10 @@ value caml_get_device_ids(value caml_platform, value caml_device_type)
 	devices = calloc(num_devices, sizeof(cl_device_id));
 	if (devices == NULL)
 		caml_failwith("calloc error");
-	raise_cl_error(
-		clGetDeviceIDs(platform, device_type, num_devices, devices, NULL));
+	errcode = clGetDeviceIDs(platform, device_type, num_devices, devices, NULL);
+	if (errcode != CL_SUCCESS)
+		free(devices);
+	raise_cl_error(errcode);
 	caml_devices = caml_alloc_tuple(num_devices);
 	for (i = 0; i < num_devices; i++)
 	{
@@ -232,6 +283,7 @@ value caml_get_device_info(value caml_device, value caml_param_name)
 	cl_device_info param_name;
 	size_t param_value_size;
 	void* param_value;
+	cl_int errcode;
 	
 	device = (cl_device_id) Nativeint_val(caml_device);
 	param_name = Int_val(caml_param_name);
@@ -240,9 +292,12 @@ value caml_get_device_info(value caml_device, value caml_param_name)
 	param_value = malloc(param_value_size);
 	if (param_value == NULL)
 		caml_failwith("malloc error");
-	raise_cl_error(
-		clGetDeviceInfo(device, param_name, param_value_size, param_value, NULL));
-	switch ((int) param_name)
+	errcode =
+		clGetDeviceInfo(device, param_name, param_value_size, param_value, NULL);
+	if (errcode != CL_SUCCESS)
+		free(param_value);
+	raise_cl_error(errcode);
+	switch (param_name)
 	{
 		case CL_DEVICE_NAME:
 			caml_param_value = caml_copy_string((char*) param_value);
@@ -297,9 +352,9 @@ cl_context_properties* cl_context_properties_val(value v)
 	return properties;
 }
 
-static value *caml_pfn_notifies = NULL;
+static value *caml_pfn_notifies_create_context = NULL;
 
-void CL_CALLBACK pfn_notify(
+void CL_CALLBACK pfn_notify_create_context(
 	const char *errinfo,
 	const void *private_info,
 	size_t cb,
@@ -307,7 +362,7 @@ void CL_CALLBACK pfn_notify(
 {
 	CAMLlocal4(caml_pfn_notify, caml_errinfo, caml_private_info, caml_cb);
 	
-	caml_pfn_notify = Field(*caml_pfn_notifies, (int) user_data);
+	caml_pfn_notify = Field(*caml_pfn_notifies_create_context, (int) user_data);
 	caml_errinfo = caml_copy_string(errinfo);
 	caml_private_info = caml_copy_nativeint(private_info);
 	caml_cb = caml_copy_nativeint(cb);
@@ -326,7 +381,10 @@ void array_add(value **array, value *element)
 		Store_field(new_array, i, Field(**array, i));
 	Store_field(new_array, length, *element);
 	if (*array != NULL)
+	{
 		caml_remove_generational_global_root(*array);
+		free(*array);
+	}
 	*array = &new_array;
 }
 
@@ -336,7 +394,6 @@ value caml_create_context(value caml_properties, value caml_devices,
 	CAMLparam4(caml_properties, caml_devices, caml_pfn_notify, caml_user_data);
 	
 	CAMLlocal1(caml_context);
-	value *tmp;
 	cl_context_properties* properties;
 	cl_uint num_devices;
 	cl_device_id* devices;
@@ -354,10 +411,13 @@ value caml_create_context(value caml_properties, value caml_devices,
 		caml_devices = Field(caml_devices, 1);
 	}
 	// Store caml_pfn_notify so that it doesn't get garbage collected
-	array_add(&caml_pfn_notifies, &caml_pfn_notify);
-	user_data = (void*) Wosize_val(*caml_pfn_notifies);
+	array_add(&caml_pfn_notifies_create_context, &caml_pfn_notify);
+	user_data = (void*) Wosize_val(*caml_pfn_notifies_create_context) - 1;
 	context = clCreateContext(
-		properties, num_devices, devices, &pfn_notify, user_data, &errcode);
+		properties, num_devices, devices, &pfn_notify_create_context, user_data,
+		&errcode);
+	free(properties);
+	free(devices);
 	raise_cl_error(errcode);
 	caml_context = caml_copy_nativeint(context);
 	
@@ -396,13 +456,101 @@ value caml_create_program_with_source(value caml_context, value caml_strings)
 	const char** strings;
 	cl_int errcode;
 	cl_program program;
+	int i;
 	
 	context = (cl_context) Nativeint_val(caml_context);
 	count = list_length(caml_strings);
 	strings = char_array_array_val(caml_strings);
 	program = clCreateProgramWithSource(context, count, strings, NULL, &errcode);
+	for (i = 0; i < count; i++)
+		free(strings + i);
 	raise_cl_error(errcode);
 	caml_program = caml_copy_nativeint(program);
 	
 	CAMLreturn(caml_program);
+}
+
+static value *caml_pfn_notifies_build_program = NULL;
+
+void CL_CALLBACK pfn_notify_build_program(cl_program program, void *user_data)
+{
+	CAMLlocal2(caml_pfn_notify, caml_program);
+	
+	caml_pfn_notify = (value) user_data;
+	caml_program = caml_copy_nativeint(program);
+	// XXX If we're sure that the callback won't be called any more, delete it to
+	// prevent leaks
+	caml_callback(caml_pfn_notify, caml_program);
+}
+
+value caml_build_program(value caml_program, value caml_devices,
+	value caml_options, value caml_pfn_notify)
+{
+	CAMLparam3(caml_program, caml_devices, caml_pfn_notify);
+	
+	cl_program program;
+	cl_uint num_devices;
+	cl_device_id *device_list;
+	const char *options;
+	void *user_data;
+	cl_int errcode;
+	
+	program = (cl_program) Nativeint_val(caml_program);
+	num_devices = list_length(caml_devices);
+	device_list = cl_device_id_val(caml_devices);
+	options = String_val(caml_options);
+	// Store caml_pfn_notify so that it doesn't get garbage collected
+	array_add(&caml_pfn_notifies_build_program, &caml_pfn_notify);
+	user_data = (void*) caml_pfn_notify;
+	errcode = clBuildProgram(program, num_devices, device_list, options,
+		&pfn_notify_build_program, user_data);
+	free(device_list);
+	raise_cl_error(errcode);
+	
+	CAMLreturn(Val_unit);
+}
+
+value caml_get_program_build_info(value caml_program, value caml_device,
+	value caml_param_name)
+{
+	CAMLparam3(caml_program, caml_device, caml_param_name);
+	
+	CAMLlocal1(caml_param_value);
+	cl_program program;
+	cl_device_id device;
+	cl_program_build_info param_name;
+	size_t param_value_size;
+	void *param_value;
+	cl_int errcode;
+	
+	program = (cl_program) Nativeint_val(caml_program);
+	device = (cl_device_id) Nativeint_val(caml_device);
+	param_name = (cl_program_build_info) Int_val(caml_param_name);
+	raise_cl_error(clGetProgramBuildInfo(program, device, param_name, 0, NULL,
+		&param_value_size));
+	param_value = malloc(param_value_size);
+	if (param_value == NULL)
+		caml_failwith("malloc error");
+	errcode = clGetProgramBuildInfo(program, device, param_name, param_value_size,
+		param_value, NULL);
+	if (errcode != CL_SUCCESS)
+		free(param_value);
+	raise_cl_error(errcode);
+	switch (param_name)
+	{
+    case CL_PROGRAM_BUILD_STATUS:
+			caml_param_value = val_cl_build_status(*((cl_build_status*) param_value));
+			break;
+    case CL_PROGRAM_BUILD_OPTIONS:
+    case CL_PROGRAM_BUILD_LOG:
+			caml_param_value = caml_copy_string((char*) param_value);
+			break;
+    case CL_PROGRAM_BINARY_TYPE:
+			caml_param_value =
+				val_cl_program_binary_type(*((cl_program_binary_type*) param_value));
+			break;
+	}
+	free(param_value);
+	
+	CAMLreturn(caml_param_value);
 }
