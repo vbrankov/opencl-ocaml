@@ -554,3 +554,22 @@ value caml_get_program_build_info(value caml_program, value caml_device,
 	
 	CAMLreturn(caml_param_value);
 }
+
+value caml_create_kernel(value caml_program, value caml_kernel_name)
+{
+	CAMLparam2(caml_program, caml_kernel_name);
+	
+	CAMLlocal1(caml_kernel);
+	cl_program program;
+	char *kernel_name;
+	cl_int errcode;
+	cl_kernel kernel;
+	
+	program = (cl_program) Nativeint_val(caml_program);
+	kernel_name = String_val(caml_kernel_name);
+	kernel = clCreateKernel(program, kernel_name, &errcode);
+	raise_cl_error(errcode);
+	caml_kernel = caml_copy_nativeint(kernel);
+	
+	CAMLreturn(caml_kernel);
+}

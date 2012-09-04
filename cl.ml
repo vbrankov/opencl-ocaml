@@ -142,6 +142,10 @@ module Program = struct
 	type t
 end
 
+module Kernel = struct
+	type t
+end
+
 module Platform_info = struct
 	type t =
 	| PROFILE
@@ -320,3 +324,4 @@ external build_program : Program.t -> Device_id.t list -> string
 	-> (Program.t -> unit) -> unit = "caml_build_program"
 external get_program_build_info : Program.t -> Device_id.t
 	-> 'a Program_build_info.t -> 'a = "caml_get_program_build_info"
+external create_kernel : Program.t -> string -> Kernel.t = "caml_create_kernel"

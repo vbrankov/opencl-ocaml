@@ -40,6 +40,9 @@ let () =
 		let build_status = Cl.get_program_build_info program device
 			Cl.Program_build_info.build_status
 		in
-		Printf.printf "%s %s\n%!" build_log (Cl.Build_status.to_string build_status)
+		Printf.printf "%s %s\n%!" build_log
+			(Cl.Build_status.to_string build_status);
+		let _kernel = Cl.create_kernel program "vector_add_gpu" in
+		()
 	with Cl.Cl_error cl_error ->
 		Printf.printf "error %s.\n" (Cl.Cl_error.to_string cl_error)
