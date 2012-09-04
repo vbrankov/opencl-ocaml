@@ -573,3 +573,35 @@ value caml_create_kernel(value caml_program, value caml_kernel_name)
 	
 	CAMLreturn(caml_kernel);
 }
+
+value caml_create_buffer(value caml_context, value caml_flags, value caml_host)
+{
+	CAMLparam3(caml_context, caml_flags, caml_host);
+	
+	CAMLlocal2(data, caml_mem);
+	cl_context context;
+	cl_mem_flags flags;
+	size_t size;
+	void *host_ptr;
+	cl_int errcode;
+	cl_mem mem;
+	int i;
+	
+	context = (cl_context) Nativeint_val(caml_context);
+	flags = cl_mem_flags_val(caml_flags);
+	data = Field(caml_host, 0);
+	switch (Tag_val(caml_host))
+	{
+		case 0: size = Int_val(data) * sizeof(double); host_ptr = NULL; break;
+		case 1:
+			size = Wosize_val(data);
+			host_ptr = (void*) data;
+			break;
+		default: caml_failwith("unrecognized Host");
+	}
+	mem = clCreateBuffer(context, flags, size, host_ptr, &errcode);
+	raise_cl_error(errcode);
+	caml_mem = caml_copy_nativeint(mem);
+	
+	CAMLreturn(caml_mem);
+}

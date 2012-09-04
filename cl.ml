@@ -146,6 +146,10 @@ module Kernel = struct
 	type t
 end
 
+module Mem = struct
+	type t
+end
+
 module Platform_info = struct
 	type t =
 	| PROFILE
@@ -259,15 +263,15 @@ end
 
 module Mem_flags = struct
 	type t =
-  | CL_MEM_READ_WRITE
-  | CL_MEM_WRITE_ONLY
-  | CL_MEM_READ_ONLY
-  | CL_MEM_USE_HOST_PTR
-  | CL_MEM_ALLOC_HOST_PTR
-  | CL_MEM_COPY_HOST_PTR
-  | CL_MEM_HOST_WRITE_ONLY
-  | CL_MEM_HOST_READ_ONLY
-  | CL_MEM_HOST_NO_ACCESS
+  | READ_WRITE
+  | WRITE_ONLY
+  | READ_ONLY
+  | USE_HOST_PTR
+  | ALLOC_HOST_PTR
+  | COPY_HOST_PTR
+  | HOST_WRITE_ONLY
+  | HOST_READ_ONLY
+  | HOST_NO_ACCESS
 end
 
 module Build_status = struct
@@ -302,6 +306,13 @@ module Program_build_info = struct
   let binary_type                       : Program_binary_type.t t = 0x1184
 end
 
+module Host = struct
+	(* XXX Not all possible hosts are implemented *)
+	type t =
+	| DOUBLE of int (* size *)
+	| DOUBLE_INIT of float array
+end
+
 exception Cl_error of Cl_error.t
 let _ = Callback.register_exception "Cl_error" (Cl_error Cl_error.SUCCESS)
 
@@ -325,3 +336,5 @@ external build_program : Program.t -> Device_id.t list -> string
 external get_program_build_info : Program.t -> Device_id.t
 	-> 'a Program_build_info.t -> 'a = "caml_get_program_build_info"
 external create_kernel : Program.t -> string -> Kernel.t = "caml_create_kernel"
+external create_buffer : Context.t -> Mem_flags.t list -> Host.t -> Mem.t
+	= "caml_create_buffer"

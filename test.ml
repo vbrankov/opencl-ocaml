@@ -20,9 +20,9 @@ let () =
 		let _command_queue = Cl.create_command_queue context device [] in
 		let program = Cl.create_program_with_source context ["
 			__kernel void vector_add_gpu (
-				__global const float* src_a,
-        __global const float* src_b,
-        __global float* res,
+				__global const double* src_a,
+        __global const double* src_b,
+        __global double* res,
 		    const int num)
 			{
 				const int idx = get_global_id(0);
@@ -43,6 +43,20 @@ let () =
 		Printf.printf "%s %s\n%!" build_log
 			(Cl.Build_status.to_string build_status);
 		let _kernel = Cl.create_kernel program "vector_add_gpu" in
+		let size = 123 in
+		let src_a_h = Array.init size float_of_int in
+		let src_b_h = Array.init size float_of_int in
+		let _src_a_d = Cl.create_buffer context
+			[Cl.Mem_flags.READ_ONLY; Cl.Mem_flags.COPY_HOST_PTR]
+			(Cl.Host.DOUBLE_INIT src_a_h)
+		in
+		let _src_b_d = Cl.create_buffer context
+			[Cl.Mem_flags.READ_ONLY; Cl.Mem_flags.COPY_HOST_PTR]
+			(Cl.Host.DOUBLE_INIT src_b_h)
+		in
+		let _res_d = Cl.create_buffer context [Cl.Mem_flags.WRITE_ONLY]
+			(Cl.Host.DOUBLE size)
+		in
 		()
 	with Cl.Cl_error cl_error ->
 		Printf.printf "error %s.\n" (Cl.Cl_error.to_string cl_error)
