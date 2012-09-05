@@ -354,6 +354,6 @@ external set_kernel_arg : Kernel.t -> int -> Arg_value.t -> unit
 	= "caml_set_kernel_arg"
 (* XXX Those [int array]s should probably be lists. *)
 external enqueue_nd_range_kernel : Command_queue.t -> Kernel.t
-	-> int array option -> int array -> int array option
+	-> int array option -> int array -> int array option -> Event.t list
 	-> Event.t = "caml_enqueue_nd_range_kernel_bytecode"
-	"caml_enqueue_nd_range_kernel_native"
+ "caml_enqueue_nd_range_kernel_native"

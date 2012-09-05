@@ -9,7 +9,7 @@
 
 value val_cl_error(cl_int error)
 {
-	return Val_int(-error - (error < 30 ? 0 : 10));
+	return Val_int(-error - (error > -30 ? 0 : 10));
 }
 
 value val_cl_platform_info(cl_platform_info platform_info)
@@ -663,7 +663,7 @@ value caml_enqueue_nd_range_kernel_native(
 	value caml_local_work_size,
 	value caml_event_wait_list)
 {
-	CAMLparam5(caml_kernel, caml_command_queue, caml_global_work_offset,
+	CAMLparam5(caml_command_queue, caml_kernel, caml_global_work_offset,
 		caml_global_work_size, caml_local_work_size);
 	CAMLxparam1(caml_event_wait_list);
 	
@@ -723,8 +723,9 @@ value caml_enqueue_nd_range_kernel_native(
 	num_events_in_wait_list = list_length(caml_event_wait_list);
 	// XXX We have a memory leak if the following call raises exception. This is
 	// very unlikely to be a recoverable situation so we shouldn't care.
-	event_wait_list = cl_event_val(caml_event_wait_list);
-	
+	event_wait_list =
+		num_events_in_wait_list == 0 ? NULL : cl_event_val(caml_event_wait_list);
+
 	errcode = clEnqueueNDRangeKernel(command_queue, kernel, work_dim,
 		global_work_offset, global_work_size, local_work_size,
 		num_events_in_wait_list, event_wait_list, &event);

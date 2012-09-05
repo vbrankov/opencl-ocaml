@@ -62,7 +62,7 @@ let () =
 		Cl.set_kernel_arg vector_add_k 2 (Cl.Arg_value.ARRAY_DOUBLE res_d);
 		Cl.set_kernel_arg vector_add_k 3 (Cl.Arg_value.INT size);
 		let _event =
-			Cl.enqueue_nd_range_kernel queue vector_add_k None [| 128 |]
+			Cl.enqueue_nd_range_kernel queue vector_add_k None [| 512 * 128 |]
 				(Some [| 512 |])
 		in
 		()
