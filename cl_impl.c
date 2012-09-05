@@ -611,7 +611,7 @@ value caml_create_buffer(value caml_context, value caml_flags, value caml_host)
 	{
 		case 0: size = Int_val(data) * sizeof(double); host_ptr = NULL; break;
 		case 1:
-			size = Wosize_val(data);
+			size = Wosize_val(data) * sizeof(int);
 			host_ptr = (void*) data;
 			break;
 		default: caml_failwith("unrecognized Host");
@@ -774,8 +774,8 @@ value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
 	switch (Tag_val(caml_ptr))
 	{
 		case 0:
-			ptr = (void*) caml_ptr;
-			size = Wosize_val(caml_ptr) / sizeof(double);
+			ptr = (void*) data;
+			size = Wosize_val(data) * sizeof(int);
 			break;
 		default:
 			caml_failwith("unrecognized Read_buffer");

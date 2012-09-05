@@ -43,7 +43,7 @@ let () =
 		Printf.printf "%s %s\n%!" build_log
 			(Cl.Build_status.to_string build_status);
 		let vector_add_k = Cl.create_kernel program "vector_add_gpu" in
-		let size = 512 * 4 in
+		let size = 16 * 16 in
 		let src_a_h = Array.init size float_of_int in
 		let src_b_h = Array.init size float_of_int in
 		let src_a_d = Cl.create_buffer context
@@ -63,7 +63,7 @@ let () =
 		Cl.set_kernel_arg vector_add_k 3 (Cl.Arg_value.INT size);
 		let _ =
 			Cl.enqueue_nd_range_kernel queue vector_add_k None [| size |]
-				(Some [| 512 |])
+				(Some [| 16 |]) []
 		in
 		let check = Array.create size 0. in
 		let _ =

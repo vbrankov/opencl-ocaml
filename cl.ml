@@ -362,6 +362,6 @@ external set_kernel_arg : Kernel.t -> int -> Arg_value.t -> unit
 external enqueue_nd_range_kernel : Command_queue.t -> Kernel.t
 	-> int array option -> int array -> int array option -> Event.t list
 	-> Event.t = "caml_enqueue_nd_range_kernel_bytecode"
- "caml_enqueue_nd_range_kernel_native"
+	"caml_enqueue_nd_range_kernel_native"
 external enqueue_read_buffer : Command_queue.t -> Mem.t -> bool
 	-> Read_buffer.t -> Event.t list -> Event.t = "caml_enqueue_read_buffer"
