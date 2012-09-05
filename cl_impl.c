@@ -747,3 +747,48 @@ value caml_enqueue_nd_range_kernel_bytecode(value *argv, int argn)
 	return caml_enqueue_nd_range_kernel_native(
 		argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
 }
+
+value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
+	value caml_blocking_read, value caml_ptr, value caml_event_wait_list)
+{
+	CAMLparam5(caml_command_queue, caml_buffer, caml_blocking_read, caml_ptr,
+		caml_event_wait_list);
+	
+	CAMLlocal2(data, caml_event);
+	cl_command_queue command_queue;
+	cl_mem buffer;
+	cl_bool blocking_read;
+	size_t offset, size;
+	void *ptr;
+	cl_uint num_events_in_wait_list;
+	cl_event *event_wait_list;
+	cl_event event;
+	cl_int errcode;
+
+	command_queue = (cl_command_queue) Nativeint_val(caml_command_queue);
+	buffer = (cl_mem) Nativeint_val(caml_buffer);
+	blocking_read = Val_int(caml_blocking_read);
+	
+	offset = 0;
+	data = Field(caml_ptr, 0);
+	switch (Tag_val(caml_ptr))
+	{
+		case 0:
+			ptr = (void*) caml_ptr;
+			size = Wosize_val(caml_ptr) / sizeof(double);
+			break;
+		default:
+			caml_failwith("unrecognized Read_buffer");
+	}
+	num_events_in_wait_list = list_length(caml_event_wait_list);
+	event_wait_list =
+		num_events_in_wait_list == 0 ? NULL : cl_event_val(caml_event_wait_list);
+	errcode = clEnqueueReadBuffer(command_queue, buffer, blocking_read, offset,
+		size, ptr, num_events_in_wait_list, event_wait_list, &event);
+	if (errcode != CL_SUCCESS)
+		free(event_wait_list);
+	raise_cl_error(errcode);
+	caml_event = caml_copy_nativeint(event);
+	
+	CAMLreturn(caml_event);
+}

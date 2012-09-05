@@ -325,6 +325,12 @@ module Arg_value = struct
 	| ARRAY_DOUBLE of Mem.t
 end
 
+module Read_buffer = struct
+	(* XXX Not all possible read buffers are implemented *)
+	type t =
+	| DOUBLE of float array
+end
+
 exception Cl_error of Cl_error.t
 let _ = Callback.register_exception "Cl_error" (Cl_error Cl_error.SUCCESS)
 
@@ -357,3 +363,5 @@ external enqueue_nd_range_kernel : Command_queue.t -> Kernel.t
 	-> int array option -> int array -> int array option -> Event.t list
 	-> Event.t = "caml_enqueue_nd_range_kernel_bytecode"
  "caml_enqueue_nd_range_kernel_native"
+external enqueue_read_buffer : Command_queue.t -> Mem.t -> bool
+	-> Read_buffer.t -> Event.t list -> Event.t = "caml_enqueue_read_buffer"

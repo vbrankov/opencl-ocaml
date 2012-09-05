@@ -43,7 +43,7 @@ let () =
 		Printf.printf "%s %s\n%!" build_log
 			(Cl.Build_status.to_string build_status);
 		let vector_add_k = Cl.create_kernel program "vector_add_gpu" in
-		let size = 512 * 128 in
+		let size = 512 * 4 in
 		let src_a_h = Array.init size float_of_int in
 		let src_b_h = Array.init size float_of_int in
 		let src_a_d = Cl.create_buffer context
@@ -61,10 +61,14 @@ let () =
 		Cl.set_kernel_arg vector_add_k 1 (Cl.Arg_value.ARRAY_DOUBLE src_b_d);
 		Cl.set_kernel_arg vector_add_k 2 (Cl.Arg_value.ARRAY_DOUBLE res_d);
 		Cl.set_kernel_arg vector_add_k 3 (Cl.Arg_value.INT size);
-		let _event =
-			Cl.enqueue_nd_range_kernel queue vector_add_k None [| 512 * 128 |]
+		let _ =
+			Cl.enqueue_nd_range_kernel queue vector_add_k None [| size |]
 				(Some [| 512 |])
 		in
-		()
+		let check = Array.create size 0. in
+		let _ =
+			Cl.enqueue_read_buffer queue res_d true (Cl.Read_buffer.DOUBLE check) []
+		in
+		Array.iter (Printf.printf "%.2f ") check
 	with Cl.Cl_error cl_error ->
 		Printf.printf "error %s.\n" (Cl.Cl_error.to_string cl_error)
