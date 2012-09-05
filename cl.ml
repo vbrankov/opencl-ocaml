@@ -1,184 +1,184 @@
 module Cl_error = struct
-	type t =
-	| SUCCESS
-	| DEVICE_NOT_FOUND
-	| DEVICE_NOT_AVAILABLE
-	| COMPILER_NOT_AVAILABLE
-	| MEM_OBJECT_ALLOCATION_FAILURE
-	| OUT_OF_RESOURCES
-	| OUT_OF_HOST_MEMORY
-	| PROFILING_INFO_NOT_AVAILABLE
-	| MEM_COPY_OVERLAP
-	| IMAGE_FORMAT_MISMATCH
-	| IMAGE_FORMAT_NOT_SUPPORTED
-	| BUILD_PROGRAM_FAILURE
-	| MAP_FAILURE
-	| MISALIGNED_SUB_BUFFER_OFFSET
-	| EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST
-	| COMPILE_PROGRAM_FAILURE
-	| LINKER_NOT_AVAILABLE
-	| LINK_PROGRAM_FAILURE
-	| DEVICE_PARTITION_FAILED
-	| KERNEL_ARG_INFO_NOT_AVAILABLE
-	| INVALID_VALUE
-	| INVALID_DEVICE_TYPE
-	| INVALID_PLATFORM
-	| INVALID_DEVICE
-	| INVALID_CONTEXT
-	| INVALID_QUEUE_PROPERTIES
-	| INVALID_COMMAND_QUEUE
-	| INVALID_HOST_PTR
-	| INVALID_MEM_OBJECT
-	| INVALID_IMAGE_FORMAT_DESCRIPTOR
-	| INVALID_IMAGE_SIZE
-	| INVALID_SAMPLER
-	| INVALID_BINARY
-	| INVALID_BUILD_OPTIONS
-	| INVALID_PROGRAM
-	| INVALID_PROGRAM_EXECUTABLE
-	| INVALID_KERNEL_NAME
-	| INVALID_KERNEL_DEFINITION
-	| INVALID_KERNEL
-	| INVALID_ARG_INDEX
-	| INVALID_ARG_VALUE
-	| INVALID_ARG_SIZE
-	| INVALID_KERNEL_ARGS
-	| INVALID_WORK_DIMENSION
-	| INVALID_WORK_GROUP_SIZE
-	| INVALID_WORK_ITEM_SIZE
-	| INVALID_GLOBAL_OFFSET
-	| INVALID_EVENT_WAIT_LIST
-	| INVALID_EVENT
-	| INVALID_OPERATION
-	| INVALID_GL_OBJECT
-	| INVALID_BUFFER_SIZE
-	| INVALID_MIP_LEVEL
-	| INVALID_GLOBAL_WORK_SIZE
-	| INVALID_PROPERTY
-	| INVALID_IMAGE_DESCRIPTOR
-	| INVALID_COMPILER_OPTIONS
-	| INVALID_LINKER_OPTIONS
-	| INVALID_DEVICE_PARTITION_COUNT
-	
-	let to_string = function
-	| SUCCESS                                   -> "SUCCESS"
-	| DEVICE_NOT_FOUND                          -> "DEVICE_NOT_FOUND"
-	| DEVICE_NOT_AVAILABLE                      -> "DEVICE_NOT_AVAILABLE"
-	| COMPILER_NOT_AVAILABLE                    -> "COMPILER_NOT_AVAILABLE"
-	| MEM_OBJECT_ALLOCATION_FAILURE             -> "MEM_OBJECT_ALLOCATION_FAILURE"
-	| OUT_OF_RESOURCES                          -> "OUT_OF_RESOURCES"
-	| OUT_OF_HOST_MEMORY                        -> "OUT_OF_HOST_MEMORY"
-	| PROFILING_INFO_NOT_AVAILABLE              -> "PROFILING_INFO_NOT_AVAILABLE"
-	| MEM_COPY_OVERLAP                          -> "MEM_COPY_OVERLAP"
-	| IMAGE_FORMAT_MISMATCH                     -> "IMAGE_FORMAT_MISMATCH"
-	| IMAGE_FORMAT_NOT_SUPPORTED                -> "IMAGE_FORMAT_NOT_SUPPORTED"
-	| BUILD_PROGRAM_FAILURE                     -> "BUILD_PROGRAM_FAILURE"
-	| MAP_FAILURE                               -> "MAP_FAILURE"
-	| MISALIGNED_SUB_BUFFER_OFFSET              -> "MISALIGNED_SUB_BUFFER_OFFSET"
-	| EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST -> "EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST"
-	| COMPILE_PROGRAM_FAILURE                   -> "COMPILE_PROGRAM_FAILURE"
-	| LINKER_NOT_AVAILABLE                      -> "LINKER_NOT_AVAILABLE"
-	| LINK_PROGRAM_FAILURE                      -> "LINK_PROGRAM_FAILURE"
-	| DEVICE_PARTITION_FAILED                   -> "DEVICE_PARTITION_FAILED"
-	| KERNEL_ARG_INFO_NOT_AVAILABLE             -> "KERNEL_ARG_INFO_NOT_AVAILABLE"
-	| INVALID_VALUE                             -> "INVALID_VALUE"
-	| INVALID_DEVICE_TYPE                       -> "INVALID_DEVICE_TYPE"
-	| INVALID_PLATFORM                          -> "INVALID_PLATFORM"
-	| INVALID_DEVICE                            -> "INVALID_DEVICE"
-	| INVALID_CONTEXT                           -> "INVALID_CONTEXT"
-	| INVALID_QUEUE_PROPERTIES                  -> "INVALID_QUEUE_PROPERTIES"
-	| INVALID_COMMAND_QUEUE                     -> "INVALID_COMMAND_QUEUE"
-	| INVALID_HOST_PTR                          -> "INVALID_HOST_PTR"
-	| INVALID_MEM_OBJECT                        -> "INVALID_MEM_OBJECT"
-	| INVALID_IMAGE_FORMAT_DESCRIPTOR           -> "INVALID_IMAGE_FORMAT_DESCRIPTOR"
-	| INVALID_IMAGE_SIZE                        -> "INVALID_IMAGE_SIZE"
-	| INVALID_SAMPLER                           -> "INVALID_SAMPLER"
-	| INVALID_BINARY                            -> "INVALID_BINARY"
-	| INVALID_BUILD_OPTIONS                     -> "INVALID_BUILD_OPTIONS"
-	| INVALID_PROGRAM                           -> "INVALID_PROGRAM"
-	| INVALID_PROGRAM_EXECUTABLE                -> "INVALID_PROGRAM_EXECUTABLE"
-	| INVALID_KERNEL_NAME                       -> "INVALID_KERNEL_NAME"
-	| INVALID_KERNEL_DEFINITION                 -> "INVALID_KERNEL_DEFINITION"
-	| INVALID_KERNEL                            -> "INVALID_KERNEL"
-	| INVALID_ARG_INDEX                         -> "INVALID_ARG_INDEX"
-	| INVALID_ARG_VALUE                         -> "INVALID_ARG_VALUE"
-	| INVALID_ARG_SIZE                          -> "INVALID_ARG_SIZE"
-	| INVALID_KERNEL_ARGS                       -> "INVALID_KERNEL_ARGS"
-	| INVALID_WORK_DIMENSION                    -> "INVALID_WORK_DIMENSION"
-	| INVALID_WORK_GROUP_SIZE                   -> "INVALID_WORK_GROUP_SIZE"
-	| INVALID_WORK_ITEM_SIZE                    -> "INVALID_WORK_ITEM_SIZE"
-	| INVALID_GLOBAL_OFFSET                     -> "INVALID_GLOBAL_OFFSET"
-	| INVALID_EVENT_WAIT_LIST                   -> "INVALID_EVENT_WAIT_LIST"
-	| INVALID_EVENT                             -> "INVALID_EVENT"
-	| INVALID_OPERATION                         -> "INVALID_OPERATION"
-	| INVALID_GL_OBJECT                         -> "INVALID_GL_OBJECT"
-	| INVALID_BUFFER_SIZE                       -> "INVALID_BUFFER_SIZE"
-	| INVALID_MIP_LEVEL                         -> "INVALID_MIP_LEVEL"
-	| INVALID_GLOBAL_WORK_SIZE                  -> "INVALID_GLOBAL_WORK_SIZE"
-	| INVALID_PROPERTY                          -> "INVALID_PROPERTY"
-	| INVALID_IMAGE_DESCRIPTOR                  -> "INVALID_IMAGE_DESCRIPTOR"
-	| INVALID_COMPILER_OPTIONS                  -> "INVALID_COMPILER_OPTIONS"
-	| INVALID_LINKER_OPTIONS                    -> "INVALID_LINKER_OPTIONS"
-	| INVALID_DEVICE_PARTITION_COUNT            -> "INVALID_DEVICE_PARTITION_COUNT"
+  type t =
+  | SUCCESS
+  | DEVICE_NOT_FOUND
+  | DEVICE_NOT_AVAILABLE
+  | COMPILER_NOT_AVAILABLE
+  | MEM_OBJECT_ALLOCATION_FAILURE
+  | OUT_OF_RESOURCES
+  | OUT_OF_HOST_MEMORY
+  | PROFILING_INFO_NOT_AVAILABLE
+  | MEM_COPY_OVERLAP
+  | IMAGE_FORMAT_MISMATCH
+  | IMAGE_FORMAT_NOT_SUPPORTED
+  | BUILD_PROGRAM_FAILURE
+  | MAP_FAILURE
+  | MISALIGNED_SUB_BUFFER_OFFSET
+  | EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST
+  | COMPILE_PROGRAM_FAILURE
+  | LINKER_NOT_AVAILABLE
+  | LINK_PROGRAM_FAILURE
+  | DEVICE_PARTITION_FAILED
+  | KERNEL_ARG_INFO_NOT_AVAILABLE
+  | INVALID_VALUE
+  | INVALID_DEVICE_TYPE
+  | INVALID_PLATFORM
+  | INVALID_DEVICE
+  | INVALID_CONTEXT
+  | INVALID_QUEUE_PROPERTIES
+  | INVALID_COMMAND_QUEUE
+  | INVALID_HOST_PTR
+  | INVALID_MEM_OBJECT
+  | INVALID_IMAGE_FORMAT_DESCRIPTOR
+  | INVALID_IMAGE_SIZE
+  | INVALID_SAMPLER
+  | INVALID_BINARY
+  | INVALID_BUILD_OPTIONS
+  | INVALID_PROGRAM
+  | INVALID_PROGRAM_EXECUTABLE
+  | INVALID_KERNEL_NAME
+  | INVALID_KERNEL_DEFINITION
+  | INVALID_KERNEL
+  | INVALID_ARG_INDEX
+  | INVALID_ARG_VALUE
+  | INVALID_ARG_SIZE
+  | INVALID_KERNEL_ARGS
+  | INVALID_WORK_DIMENSION
+  | INVALID_WORK_GROUP_SIZE
+  | INVALID_WORK_ITEM_SIZE
+  | INVALID_GLOBAL_OFFSET
+  | INVALID_EVENT_WAIT_LIST
+  | INVALID_EVENT
+  | INVALID_OPERATION
+  | INVALID_GL_OBJECT
+  | INVALID_BUFFER_SIZE
+  | INVALID_MIP_LEVEL
+  | INVALID_GLOBAL_WORK_SIZE
+  | INVALID_PROPERTY
+  | INVALID_IMAGE_DESCRIPTOR
+  | INVALID_COMPILER_OPTIONS
+  | INVALID_LINKER_OPTIONS
+  | INVALID_DEVICE_PARTITION_COUNT
+  
+  let to_string = function
+  | SUCCESS                                   -> "SUCCESS"
+  | DEVICE_NOT_FOUND                          -> "DEVICE_NOT_FOUND"
+  | DEVICE_NOT_AVAILABLE                      -> "DEVICE_NOT_AVAILABLE"
+  | COMPILER_NOT_AVAILABLE                    -> "COMPILER_NOT_AVAILABLE"
+  | MEM_OBJECT_ALLOCATION_FAILURE             -> "MEM_OBJECT_ALLOCATION_FAILURE"
+  | OUT_OF_RESOURCES                          -> "OUT_OF_RESOURCES"
+  | OUT_OF_HOST_MEMORY                        -> "OUT_OF_HOST_MEMORY"
+  | PROFILING_INFO_NOT_AVAILABLE              -> "PROFILING_INFO_NOT_AVAILABLE"
+  | MEM_COPY_OVERLAP                          -> "MEM_COPY_OVERLAP"
+  | IMAGE_FORMAT_MISMATCH                     -> "IMAGE_FORMAT_MISMATCH"
+  | IMAGE_FORMAT_NOT_SUPPORTED                -> "IMAGE_FORMAT_NOT_SUPPORTED"
+  | BUILD_PROGRAM_FAILURE                     -> "BUILD_PROGRAM_FAILURE"
+  | MAP_FAILURE                               -> "MAP_FAILURE"
+  | MISALIGNED_SUB_BUFFER_OFFSET              -> "MISALIGNED_SUB_BUFFER_OFFSET"
+  | EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST -> "EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST"
+  | COMPILE_PROGRAM_FAILURE                   -> "COMPILE_PROGRAM_FAILURE"
+  | LINKER_NOT_AVAILABLE                      -> "LINKER_NOT_AVAILABLE"
+  | LINK_PROGRAM_FAILURE                      -> "LINK_PROGRAM_FAILURE"
+  | DEVICE_PARTITION_FAILED                   -> "DEVICE_PARTITION_FAILED"
+  | KERNEL_ARG_INFO_NOT_AVAILABLE             -> "KERNEL_ARG_INFO_NOT_AVAILABLE"
+  | INVALID_VALUE                             -> "INVALID_VALUE"
+  | INVALID_DEVICE_TYPE                       -> "INVALID_DEVICE_TYPE"
+  | INVALID_PLATFORM                          -> "INVALID_PLATFORM"
+  | INVALID_DEVICE                            -> "INVALID_DEVICE"
+  | INVALID_CONTEXT                           -> "INVALID_CONTEXT"
+  | INVALID_QUEUE_PROPERTIES                  -> "INVALID_QUEUE_PROPERTIES"
+  | INVALID_COMMAND_QUEUE                     -> "INVALID_COMMAND_QUEUE"
+  | INVALID_HOST_PTR                          -> "INVALID_HOST_PTR"
+  | INVALID_MEM_OBJECT                        -> "INVALID_MEM_OBJECT"
+  | INVALID_IMAGE_FORMAT_DESCRIPTOR           -> "INVALID_IMAGE_FORMAT_DESCRIPTOR"
+  | INVALID_IMAGE_SIZE                        -> "INVALID_IMAGE_SIZE"
+  | INVALID_SAMPLER                           -> "INVALID_SAMPLER"
+  | INVALID_BINARY                            -> "INVALID_BINARY"
+  | INVALID_BUILD_OPTIONS                     -> "INVALID_BUILD_OPTIONS"
+  | INVALID_PROGRAM                           -> "INVALID_PROGRAM"
+  | INVALID_PROGRAM_EXECUTABLE                -> "INVALID_PROGRAM_EXECUTABLE"
+  | INVALID_KERNEL_NAME                       -> "INVALID_KERNEL_NAME"
+  | INVALID_KERNEL_DEFINITION                 -> "INVALID_KERNEL_DEFINITION"
+  | INVALID_KERNEL                            -> "INVALID_KERNEL"
+  | INVALID_ARG_INDEX                         -> "INVALID_ARG_INDEX"
+  | INVALID_ARG_VALUE                         -> "INVALID_ARG_VALUE"
+  | INVALID_ARG_SIZE                          -> "INVALID_ARG_SIZE"
+  | INVALID_KERNEL_ARGS                       -> "INVALID_KERNEL_ARGS"
+  | INVALID_WORK_DIMENSION                    -> "INVALID_WORK_DIMENSION"
+  | INVALID_WORK_GROUP_SIZE                   -> "INVALID_WORK_GROUP_SIZE"
+  | INVALID_WORK_ITEM_SIZE                    -> "INVALID_WORK_ITEM_SIZE"
+  | INVALID_GLOBAL_OFFSET                     -> "INVALID_GLOBAL_OFFSET"
+  | INVALID_EVENT_WAIT_LIST                   -> "INVALID_EVENT_WAIT_LIST"
+  | INVALID_EVENT                             -> "INVALID_EVENT"
+  | INVALID_OPERATION                         -> "INVALID_OPERATION"
+  | INVALID_GL_OBJECT                         -> "INVALID_GL_OBJECT"
+  | INVALID_BUFFER_SIZE                       -> "INVALID_BUFFER_SIZE"
+  | INVALID_MIP_LEVEL                         -> "INVALID_MIP_LEVEL"
+  | INVALID_GLOBAL_WORK_SIZE                  -> "INVALID_GLOBAL_WORK_SIZE"
+  | INVALID_PROPERTY                          -> "INVALID_PROPERTY"
+  | INVALID_IMAGE_DESCRIPTOR                  -> "INVALID_IMAGE_DESCRIPTOR"
+  | INVALID_COMPILER_OPTIONS                  -> "INVALID_COMPILER_OPTIONS"
+  | INVALID_LINKER_OPTIONS                    -> "INVALID_LINKER_OPTIONS"
+  | INVALID_DEVICE_PARTITION_COUNT            -> "INVALID_DEVICE_PARTITION_COUNT"
 end
 
 module Platform_id = struct
-	type t
+  type t
 end
 
 module Device_id = struct
-	type t
+  type t
 end
 
 module Context = struct
-	type t
+  type t
 end
 
 module Command_queue = struct
-	type t
+  type t
 end
 
 module Program = struct
-	type t
+  type t
 end
 
 module Kernel = struct
-	type t
+  type t
 end
 
 module Mem = struct
-	type t
+  type t
 end
 
 module Event = struct
-	type t
+  type t
 end
 
 module Platform_info = struct
-	type t =
-	| PROFILE
-	| VERSION
-	| NAME
-	| VENDOR
-	| EXTENSIONS
+  type t =
+  | PROFILE
+  | VERSION
+  | NAME
+  | VENDOR
+  | EXTENSIONS
 end
 
 module Device_type = struct
-	type t =
-	| DEFAULT
-	| CPU
-	| GPU
-	| ACCELERATOR
-	| CUSTOM
-	| ALL
+  type t =
+  | DEFAULT
+  | CPU
+  | GPU
+  | ACCELERATOR
+  | CUSTOM
+  | ALL
 end
 
 module Device_info = struct
-	type 'a t = int
-	
-	(* XXX All values where ['a] is [unit] are unfinished *)
-	let device_type                       : unit t = 0x1000
-	let vendor_id                         : unit t = 0x1001
+  type 'a t = int
+  
+  (* XXX All values where ['a] is [unit] are unfinished *)
+  let device_type                       : unit t = 0x1000
+  let vendor_id                         : unit t = 0x1001
   let max_compute_units                 : unit t = 0x1002
   let max_work_item_dimensions          : unit t = 0x1003
   let max_work_group_size               : unit t = 0x1004
@@ -253,20 +253,20 @@ module Device_info = struct
 end
 
 module Context_properties = struct
-	(* XXX Not all the contexts are done *)
-	type t =
-	| CONTEXT_PLATFORM of Platform_id.t
-	| CONTEXT_INTEROP_USER_SYNC of bool
+  (* XXX Not all the contexts are done *)
+  type t =
+  | CONTEXT_PLATFORM of Platform_id.t
+  | CONTEXT_INTEROP_USER_SYNC of bool
 end
 
 module Command_queue_properties = struct
-	type t =
-	| CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
-	| CL_QUEUE_PROFILING_ENABLE
+  type t =
+  | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
+  | CL_QUEUE_PROFILING_ENABLE
 end
 
 module Mem_flags = struct
-	type t =
+  type t =
   | READ_WRITE
   | WRITE_ONLY
   | READ_ONLY
@@ -279,21 +279,21 @@ module Mem_flags = struct
 end
 
 module Build_status = struct
-	type t =
-	| SUCCESS
-	| NONE
-	| ERROR
-	| IN_PROGRESS
-	
-	let to_string = function
-	| SUCCESS     -> "SUCCESS"
-	| NONE        -> "NONE"
-	| ERROR       -> "ERROR"
-	| IN_PROGRESS -> "IN_PROGRESS"
+  type t =
+  | SUCCESS
+  | NONE
+  | ERROR
+  | IN_PROGRESS
+  
+  let to_string = function
+  | SUCCESS     -> "SUCCESS"
+  | NONE        -> "NONE"
+  | ERROR       -> "ERROR"
+  | IN_PROGRESS -> "IN_PROGRESS"
 end
 
 module Program_binary_type = struct
-	type t =
+  type t =
   | NONE
   | COMPILED_OBJECT
   | LIBRARY
@@ -301,9 +301,9 @@ module Program_binary_type = struct
 end
 
 module Program_build_info = struct
-	type 'a t = int
-	
-	(* XXX All values where ['a] is [unit] are unfinished *)
+  type 'a t = int
+  
+  (* XXX All values where ['a] is [unit] are unfinished *)
   let build_status                      : Build_status.t t = 0x1181
   let build_options                     : string t = 0x1182
   let build_log                         : string t = 0x1183
@@ -311,57 +311,57 @@ module Program_build_info = struct
 end
 
 module Host = struct
-	(* XXX Not all possible hosts are implemented *)
-	type t =
-	| DOUBLE of int (* size *)
-	| DOUBLE_INIT of float array
+  (* XXX Not all possible hosts are implemented *)
+  type t =
+  | DOUBLE of int (* size *)
+  | DOUBLE_INIT of float array
 end
 
 module Arg_value = struct
-	(* XXX Not all possible arguments are implemented *)
-	type t =
-	| INT of int
-	(* XXX We should probaby have Mem.t parametrized for type safety *)
-	| ARRAY_DOUBLE of Mem.t
+  (* XXX Not all possible arguments are implemented *)
+  type t =
+  | INT of int
+  (* XXX We should probaby have Mem.t parametrized for type safety *)
+  | ARRAY_DOUBLE of Mem.t
 end
 
 module Read_buffer = struct
-	(* XXX Not all possible read buffers are implemented *)
-	type t =
-	| DOUBLE of float array
+  (* XXX Not all possible read buffers are implemented *)
+  type t =
+  | DOUBLE of float array
 end
 
 exception Cl_error of Cl_error.t
 let _ = Callback.register_exception "Cl_error" (Cl_error Cl_error.SUCCESS)
 
 external get_platform_ids : unit -> Platform_id.t array
-	= "caml_get_platform_ids"
+  = "caml_get_platform_ids"
 external get_platform_info : Platform_id.t -> Platform_info.t -> string
-	= "caml_get_platform_info"
+  = "caml_get_platform_info"
 external get_device_ids : Platform_id.t -> Device_type.t list
-	-> Device_id.t array = "caml_get_device_ids"
+  -> Device_id.t array = "caml_get_device_ids"
 external get_device_info : Device_id.t -> 'a Device_info.t -> 'a
-	= "caml_get_device_info"
+  = "caml_get_device_info"
 external create_context : Context_properties.t list -> Device_id.t list
-	-> (string -> int64 -> int64 -> unit) -> Context.t = "caml_create_context"
+  -> (string -> int64 -> int64 -> unit) -> Context.t = "caml_create_context"
 external create_command_queue : Context.t -> Device_id.t
-	-> Command_queue_properties.t list -> Command_queue.t
-	= "caml_create_command_queue"
+  -> Command_queue_properties.t list -> Command_queue.t
+  = "caml_create_command_queue"
 external create_program_with_source : Context.t -> string list -> Program.t
-	= "caml_create_program_with_source"
+  = "caml_create_program_with_source"
 external build_program : Program.t -> Device_id.t list -> string
-	-> (Program.t -> unit) -> unit = "caml_build_program"
+  -> (Program.t -> unit) -> unit = "caml_build_program"
 external get_program_build_info : Program.t -> Device_id.t
-	-> 'a Program_build_info.t -> 'a = "caml_get_program_build_info"
+  -> 'a Program_build_info.t -> 'a = "caml_get_program_build_info"
 external create_kernel : Program.t -> string -> Kernel.t = "caml_create_kernel"
 external create_buffer : Context.t -> Mem_flags.t list -> Host.t -> Mem.t
-	= "caml_create_buffer"
+  = "caml_create_buffer"
 external set_kernel_arg : Kernel.t -> int -> Arg_value.t -> unit
-	= "caml_set_kernel_arg"
+  = "caml_set_kernel_arg"
 (* XXX Those [int array]s should probably be lists. *)
 external enqueue_nd_range_kernel : Command_queue.t -> Kernel.t
-	-> int array option -> int array -> int array option -> Event.t list
-	-> Event.t = "caml_enqueue_nd_range_kernel_bytecode"
-	"caml_enqueue_nd_range_kernel_native"
+  -> int array option -> int array -> int array option -> Event.t list
+  -> Event.t = "caml_enqueue_nd_range_kernel_bytecode"
+  "caml_enqueue_nd_range_kernel_native"
 external enqueue_read_buffer : Command_queue.t -> Mem.t -> bool
-	-> Read_buffer.t -> Event.t list -> Event.t = "caml_enqueue_read_buffer"
+  -> Read_buffer.t -> Event.t list -> Event.t = "caml_enqueue_read_buffer"
