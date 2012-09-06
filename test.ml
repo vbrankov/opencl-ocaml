@@ -20,9 +20,9 @@ let () =
     let queue = Cl.create_command_queue context device [] in
     let program = Cl.create_program_with_source context ["
       __kernel void vector_add_gpu (
-        __global const double* src_a,
-        __global const double* src_b,
-        __global double* res,
+        __global const float* src_a,
+        __global const int* src_b,
+        __global float* res,
         const int num)
       {
         const int idx = get_global_id(0);
@@ -44,12 +44,12 @@ let () =
       (Cl.Build_status.to_string build_status);
     let vector_add_k = Cl.create_kernel program "vector_add_gpu" in
     let size = 16 * 16 in
-    let src_a_h = Bigarray.(Array1.create float64 c_layout size) in
-    let src_b_h = Bigarray.(Array1.create float64 c_layout size) in
-    let res_h   = Bigarray.(Array1.create float64 c_layout size) in
+    let src_a_h = Bigarray.(Array1.create float32 c_layout size) in
+    let src_b_h = Bigarray.(Array1.create int32 c_layout size) in
+    let res_h   = Bigarray.(Array1.create float32 c_layout size) in
     for i = 0 to size - 1 do
       src_a_h.{i} <- float_of_int i;
-      src_b_h.{i} <- float_of_int i
+      src_b_h.{i} <- Int32.of_int i
     done;
     let src_a_d = Cl.create_buffer context
       [Cl.Mem_flags.READ_ONLY; Cl.Mem_flags.COPY_HOST_PTR] src_a_h
