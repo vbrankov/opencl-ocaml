@@ -805,3 +805,15 @@ value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
   
   CAMLreturn(caml_event);
 }
+
+value caml_release_kernel(value caml_kernel)
+{
+  CAMLparam1(caml_kernel);
+  
+  cl_kernel kernel;
+  
+  kernel = (cl_kernel) Nativeint_val(caml_kernel);
+  raise_cl_error(clReleaseKernel(kernel));
+  
+  CAMLreturn(Val_unit);
+}

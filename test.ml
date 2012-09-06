@@ -70,6 +70,7 @@ let () =
     let _ = Cl.enqueue_read_buffer queue res_d true res_h [] in
     for i = 0 to size - 1 do
       Printf.printf "%.2f " res_h.{i}
-    done
+    done;
+    Cl.release_kernel vector_add_k
   with Cl.Cl_error cl_error ->
     Printf.printf "error %s.\n" (Cl.Cl_error.to_string cl_error)

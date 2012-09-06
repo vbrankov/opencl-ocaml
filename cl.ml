@@ -354,3 +354,4 @@ external enqueue_nd_range_kernel : Command_queue.t -> Kernel.t
 external enqueue_read_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
   -> ('a, 'b, _) Bigarray.Array1.t -> Event.t list -> Event.t
   = "caml_enqueue_read_buffer"
+external release_kernel : Kernel.t -> unit = "caml_release_kernel"
