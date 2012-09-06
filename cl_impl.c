@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <caml/alloc.h>
+#include <caml/bigarray.h>
 #include <caml/callback.h>
 #include <caml/fail.h>
 #include <caml/memory.h>
@@ -591,11 +592,36 @@ value caml_create_kernel(value caml_program, value caml_kernel_name)
   CAMLreturn(caml_kernel);
 }
 
-value caml_create_buffer(value caml_context, value caml_flags, value caml_host)
+void array1_val(value caml_array1, void **ptr, size_t *size)
 {
-  CAMLparam3(caml_context, caml_flags, caml_host);
+  struct caml_ba_array *array1;
+  size_t elt_size;
   
-  CAMLlocal2(data, caml_mem);
+  array1 = Bigarray_val(caml_array1);
+  switch (array1->flags & BIGARRAY_KIND_MASK)
+  {
+    case BIGARRAY_FLOAT32:    elt_size = 4; break;
+    case BIGARRAY_FLOAT64:    elt_size = 8; break;
+    case BIGARRAY_SINT8:
+    case BIGARRAY_UINT8:      elt_size = 1; break;
+    case BIGARRAY_SINT16:
+    case BIGARRAY_UINT16:     elt_size = 2; break;
+    case BIGARRAY_INT32:      elt_size = 4; break;
+    case BIGARRAY_INT64:      elt_size = 8; break;
+    case BIGARRAY_CAML_INT:   elt_size = sizeof(int); break;
+    case BIGARRAY_NATIVE_INT: elt_size = sizeof(int); break;
+    default: caml_failwith("unrecognized Array1 kind");
+  }
+  *size = array1->dim[0] * elt_size;
+  *ptr = array1->data;
+}
+
+value caml_create_buffer(value caml_context, value caml_flags,
+  value caml_array1)
+{
+  CAMLparam3(caml_context, caml_flags, caml_array1);
+  
+  CAMLlocal1(caml_mem);
   cl_context context;
   cl_mem_flags flags;
   size_t size;
@@ -605,16 +631,7 @@ value caml_create_buffer(value caml_context, value caml_flags, value caml_host)
   
   context = (cl_context) Nativeint_val(caml_context);
   flags = cl_mem_flags_val(caml_flags);
-  data = Field(caml_host, 0);
-  switch (Tag_val(caml_host))
-  {
-    case 0: size = Int_val(data) * sizeof(double); host_ptr = NULL; break;
-    case 1:
-      size = Wosize_val(data) * sizeof(int);
-      host_ptr = (void*) data;
-      break;
-    default: caml_failwith("unrecognized Host");
-  }
+  array1_val(caml_array1, &host_ptr, &size);
   mem = clCreateBuffer(context, flags, size, host_ptr, &errcode);
   raise_cl_error(errcode);
   caml_mem = caml_copy_nativeint((int) mem);
@@ -748,9 +765,9 @@ value caml_enqueue_nd_range_kernel_bytecode(value *argv, int argn)
 }
 
 value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
-  value caml_blocking_read, value caml_ptr, value caml_event_wait_list)
+  value caml_blocking_read, value caml_array1, value caml_event_wait_list)
 {
-  CAMLparam5(caml_command_queue, caml_buffer, caml_blocking_read, caml_ptr,
+  CAMLparam5(caml_command_queue, caml_buffer, caml_blocking_read, caml_array1,
     caml_event_wait_list);
   
   CAMLlocal2(data, caml_event);
@@ -769,16 +786,7 @@ value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
   blocking_read = Val_int(caml_blocking_read);
   
   offset = 0;
-  data = Field(caml_ptr, 0);
-  switch (Tag_val(caml_ptr))
-  {
-    case 0:
-      ptr = (void*) data;
-      size = Wosize_val(data) * sizeof(int);
-      break;
-    default:
-      caml_failwith("unrecognized Read_buffer");
-  }
+  array1_val(caml_array1, &ptr, &size);
   num_events_in_wait_list = list_length(caml_event_wait_list);
   event_wait_list =
     num_events_in_wait_list == 0 ? NULL : cl_event_val(caml_event_wait_list);

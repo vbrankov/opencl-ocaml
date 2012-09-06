@@ -310,25 +310,12 @@ module Program_build_info = struct
   let binary_type                       : Program_binary_type.t t = 0x1184
 end
 
-module Host = struct
-  (* XXX Not all possible hosts are implemented *)
-  type t =
-  | DOUBLE of int (* size *)
-  | DOUBLE_INIT of float array
-end
-
 module Arg_value = struct
   (* XXX Not all possible arguments are implemented *)
   type t =
   | INT of int
   (* XXX We should probaby have Mem.t parametrized for type safety *)
   | ARRAY_DOUBLE of Mem.t
-end
-
-module Read_buffer = struct
-  (* XXX Not all possible read buffers are implemented *)
-  type t =
-  | DOUBLE of float array
 end
 
 exception Cl_error of Cl_error.t
@@ -354,8 +341,11 @@ external build_program : Program.t -> Device_id.t list -> string
 external get_program_build_info : Program.t -> Device_id.t
   -> 'a Program_build_info.t -> 'a = "caml_get_program_build_info"
 external create_kernel : Program.t -> string -> Kernel.t = "caml_create_kernel"
-external create_buffer : Context.t -> Mem_flags.t list -> Host.t -> Mem.t
-  = "caml_create_buffer"
+(* XXX We probably want different things instead of Array1.t *)
+(* XXX Different options are totally incompatible with Array1.t.  We should get
+   all that in order. *)
+external create_buffer : Context.t -> Mem_flags.t list
+  -> (_, _, _) Bigarray.Array1.t -> Mem.t = "caml_create_buffer"
 external set_kernel_arg : Kernel.t -> int -> Arg_value.t -> unit
   = "caml_set_kernel_arg"
 (* XXX Those [int array]s should probably be lists. *)
@@ -364,4 +354,5 @@ external enqueue_nd_range_kernel : Command_queue.t -> Kernel.t
   -> Event.t = "caml_enqueue_nd_range_kernel_bytecode"
   "caml_enqueue_nd_range_kernel_native"
 external enqueue_read_buffer : Command_queue.t -> Mem.t -> bool
-  -> Read_buffer.t -> Event.t list -> Event.t = "caml_enqueue_read_buffer"
+  -> (_, _, _) Bigarray.Array1.t -> Event.t list -> Event.t
+  = "caml_enqueue_read_buffer"

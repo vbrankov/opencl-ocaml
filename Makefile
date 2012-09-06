@@ -5,10 +5,8 @@ SOURCES = cl.ml test.ml
 all: test.exe
 
 test.exe: cl_impl.o $(SOURCES)
-#	@ocamlc -o test.exe -custom -ccopt '-L$(OPENCL_LIB_DIR)' -cclib -lOpenCL \
-#		cl_impl.o $(SOURCES)
 	@ocamlopt -o test.exe -ccopt "-L\"$(OPENCL_LIB_DIR)\"" -cclib -lOpenCL \
-		cl_impl.o $(SOURCES)
+		bigarray.cmxa cl_impl.o $(SOURCES)
 
 cl_impl.o: cl_impl.c
 	@ocamlopt -ccopt "-I\"$(OPENCL_INCLUDE_DIR)\"" -c cl_impl.c
