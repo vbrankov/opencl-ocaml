@@ -147,7 +147,7 @@ module Kernel = struct
 end
 
 module Mem = struct
-  type t
+  type ('a, 'b) t
 end
 
 module Event = struct
@@ -312,10 +312,9 @@ end
 
 module Arg_value = struct
   (* XXX Not all possible arguments are implemented *)
-  type t =
+  type ('a, 'b) t =
   | INT of int
-  (* XXX We should probaby have Mem.t parametrized for type safety *)
-  | ARRAY_DOUBLE of Mem.t
+  | MEM of ('a, 'b) Mem.t
 end
 
 exception Cl_error of Cl_error.t
@@ -345,13 +344,13 @@ external create_kernel : Program.t -> string -> Kernel.t = "caml_create_kernel"
 (* XXX Different options are totally incompatible with Array1.t.  We should get
    all that in order. *)
 external create_buffer : Context.t -> Mem_flags.t list
-  -> (_, _, _) Bigarray.Array1.t -> Mem.t = "caml_create_buffer"
-external set_kernel_arg : Kernel.t -> int -> Arg_value.t -> unit
+  -> ('a, 'b, _) Bigarray.Array1.t -> ('a, 'b) Mem.t = "caml_create_buffer"
+external set_kernel_arg : Kernel.t -> int -> (_, _) Arg_value.t -> unit
   = "caml_set_kernel_arg"
 external enqueue_nd_range_kernel : Command_queue.t -> Kernel.t
   -> int list option -> int list -> int list option -> Event.t list
   -> Event.t = "caml_enqueue_nd_range_kernel_bytecode"
   "caml_enqueue_nd_range_kernel_native"
-external enqueue_read_buffer : Command_queue.t -> Mem.t -> bool
-  -> (_, _, _) Bigarray.Array1.t -> Event.t list -> Event.t
+external enqueue_read_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
+  -> ('a, 'b, _) Bigarray.Array1.t -> Event.t list -> Event.t
   = "caml_enqueue_read_buffer"

@@ -60,9 +60,9 @@ let () =
     let res_d = Cl.create_buffer context
       [Cl.Mem_flags.WRITE_ONLY; Cl.Mem_flags.COPY_HOST_PTR] res_h
     in
-    Cl.set_kernel_arg vector_add_k 0 (Cl.Arg_value.ARRAY_DOUBLE src_a_d);
-    Cl.set_kernel_arg vector_add_k 1 (Cl.Arg_value.ARRAY_DOUBLE src_b_d);
-    Cl.set_kernel_arg vector_add_k 2 (Cl.Arg_value.ARRAY_DOUBLE res_d);
+    Cl.set_kernel_arg vector_add_k 0 (Cl.Arg_value.MEM src_a_d);
+    Cl.set_kernel_arg vector_add_k 1 (Cl.Arg_value.MEM src_b_d);
+    Cl.set_kernel_arg vector_add_k 2 (Cl.Arg_value.MEM res_d);
     Cl.set_kernel_arg vector_add_k 3 (Cl.Arg_value.INT size);
     let _ =
       Cl.enqueue_nd_range_kernel queue vector_add_k None [size] (Some [16]) []
