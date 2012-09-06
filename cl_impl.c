@@ -817,3 +817,39 @@ value caml_release_kernel(value caml_kernel)
   
   CAMLreturn(Val_unit);
 }
+
+value caml_release_command_queue(value caml_command_queue)
+{
+  CAMLparam1(caml_command_queue);
+  
+  cl_command_queue command_queue;
+  
+  command_queue = (cl_command_queue) Nativeint_val(caml_command_queue);
+  raise_cl_error(clReleaseCommandQueue(command_queue));
+  
+  CAMLreturn(Val_unit);
+}
+
+value caml_release_context(value caml_context)
+{
+  CAMLparam1(caml_context);
+  
+  cl_context context;
+  
+  context = (cl_context) Nativeint_val(caml_context);
+  raise_cl_error(clReleaseContext(context));
+  
+  CAMLreturn(Val_unit);
+}
+
+value caml_release_mem_object(value caml_memobj)
+{
+  CAMLparam1(caml_memobj);
+  
+  cl_mem memobj;
+  
+  memobj = (cl_mem) Nativeint_val(caml_memobj);
+  raise_cl_error(clReleaseMemObject(memobj));
+  
+  CAMLreturn(Val_unit);
+}

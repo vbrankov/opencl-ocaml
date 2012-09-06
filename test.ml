@@ -71,6 +71,11 @@ let () =
     for i = 0 to size - 1 do
       Printf.printf "%.2f " res_h.{i}
     done;
-    Cl.release_kernel vector_add_k
+    Cl.release_kernel vector_add_k;
+    Cl.release_command_queue queue;
+    Cl.release_context context;
+    Cl.release_mem_object(src_a_d);
+    Cl.release_mem_object(src_b_d);
+    Cl.release_mem_object(res_d)
   with Cl.Cl_error cl_error ->
     Printf.printf "error %s.\n" (Cl.Cl_error.to_string cl_error)
