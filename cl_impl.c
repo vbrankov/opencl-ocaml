@@ -130,36 +130,76 @@ cl_mem_flags cl_mem_flags_val(value v)
 
 const char** char_array_array_val(value v)
 {
-  const char** s;
-  int i;
+  const char **a;
+  size_t i, l;
   
-  s = malloc(list_length(v));
-  if (s == NULL)
+  l = list_length(v);
+  if (l == 0)
+    return NULL;
+  a = calloc(l, sizeof(char));
+  if (a == NULL)
     caml_failwith("malloc error");
   for (i = 0; Is_block(v); i++)
   {
     assert(Tag_val(v) == 0);
-    s[i] = String_val(Field(v, 0));
+    a[i] = String_val(Field(v, 0));
     v = Field(v, 1);
   }
-  return s;
+  return a;
 }
 
-cl_device_id* cl_device_id_val(value v)
+void size_t_array_val(value v, size_t **a, size_t *length)
 {
-  cl_device_id* d;
-  int i;
+  size_t i;
   
-  d = calloc(list_length(v), sizeof(cl_device_id));
-  if (d == NULL)
+  *length = list_length(v);
+  if (*length == 0)
+  {
+    *a = NULL;
+    return;
+  }
+  *a = calloc(*length, sizeof(size_t));
+  if (*a == NULL)
     caml_failwith("calloc error");
   for (i = 0; Is_block(v); i++)
   {
     assert(Tag_val(v) == 0);
-    d[i] = (cl_device_id) Nativeint_val(Field(v, 0));
+    *a[i] = Int_val(Field(v, 0));
     v = Field(v, 1);
   }
-  return d;
+}
+
+void size_t_array_option_val(value v, size_t **a, size_t *length)
+{
+  if (Is_block(v))
+  {
+    size_t_array_val(Field(v, 0), a, length);
+  }
+  else
+  {
+    *a = NULL;
+    *length = 0;
+  }
+}
+
+cl_device_id* cl_device_id_val(value v)
+{
+  cl_device_id* a;
+  size_t i, l;
+  
+  l = list_length(v);
+  if (l == 0)
+    return NULL;
+  a = calloc(l, sizeof(cl_device_id));
+  if (a == NULL)
+    caml_failwith("calloc error");
+  for (i = 0; Is_block(v); i++)
+  {
+    assert(Tag_val(v) == 0);
+    a[i] = (cl_device_id) Nativeint_val(Field(v, 0));
+    v = Field(v, 1);
+  }
+  return a;
 }
 
 cl_event* cl_event_val(value v)
@@ -683,7 +723,7 @@ value caml_enqueue_nd_range_kernel_native(
     caml_global_work_size, caml_local_work_size);
   CAMLxparam1(caml_event_wait_list);
   
-  CAMLlocal2(a, caml_event);
+  CAMLlocal1(caml_event);
   cl_command_queue command_queue;
   cl_kernel kernel;
   cl_uint work_dim, num_events_in_wait_list;
@@ -693,48 +733,14 @@ value caml_enqueue_nd_range_kernel_native(
   
   command_queue = (cl_command_queue) Nativeint_val(caml_command_queue);
   kernel = (cl_kernel) Nativeint_val(caml_kernel);
-  work_dim = Wosize_val(caml_global_work_size);
   
-  if (Is_block(caml_global_work_offset))
-  {
-    a = Field(caml_global_work_offset, 0);
-    if (Wosize_val(a) != work_dim)
-      caml_failwith("global_work_offset and global_work_size must be of equal dimensions");
-    global_work_offset = calloc(work_dim, sizeof(size_t));
-    if (global_work_offset == NULL)
-      caml_failwith("calloc error");
-    for (i = 0; i < work_dim; i++)
-      global_work_offset[i] = Int_val(Field(a, i));
-  }
-  else
-    global_work_offset = NULL;
-    
-  global_work_size = calloc(work_dim, sizeof(size_t));
-  if (global_work_size == NULL)
-  {
-    free(global_work_offset);
-    caml_failwith("calloc error");
-  }
-  for (i = 0; i < work_dim; i++)
-    global_work_size[i] = Int_val(Field(caml_global_work_size, i));
-  
-  if (Is_block(caml_local_work_size))
-  {
-    a = Field(caml_local_work_size, 0);
-    if (Wosize_val(a) != work_dim)
-      caml_failwith("local_work_size and global_work_size must be of equal dimensions");
-    local_work_size = calloc(work_dim, sizeof(size_t));
-    if (local_work_size == NULL)
-    {
-      free(global_work_offset);
-      free(global_work_size);
-      caml_failwith("calloc error");
-    }
-    for (i = 0; i < work_dim; i++)
-      local_work_size[i] = Int_val(Field(a, i));
-  }
-  else
-    local_work_size = NULL;
+  size_t_array_val(caml_global_work_size, &global_work_size, &work_dim);
+  size_t_array_option_val(caml_global_work_offset, &global_work_offset, &i);
+  if (i != 0 && i != work_dim)
+    caml_failwith("global_work_offset and global_work_size must be of equal dimensions");
+  size_t_array_option_val(caml_local_work_size, &local_work_size, &i);
+  if (i != 0 && i != work_dim)
+    caml_failwith("local_work_size and global_work_size must be of equal dimensions");
   
   num_events_in_wait_list = list_length(caml_event_wait_list);
   // XXX We have a memory leak if the following call raises exception. This is

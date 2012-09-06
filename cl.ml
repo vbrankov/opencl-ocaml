@@ -348,9 +348,8 @@ external create_buffer : Context.t -> Mem_flags.t list
   -> (_, _, _) Bigarray.Array1.t -> Mem.t = "caml_create_buffer"
 external set_kernel_arg : Kernel.t -> int -> Arg_value.t -> unit
   = "caml_set_kernel_arg"
-(* XXX Those [int array]s should probably be lists. *)
 external enqueue_nd_range_kernel : Command_queue.t -> Kernel.t
-  -> int array option -> int array -> int array option -> Event.t list
+  -> int list option -> int list -> int list option -> Event.t list
   -> Event.t = "caml_enqueue_nd_range_kernel_bytecode"
   "caml_enqueue_nd_range_kernel_native"
 external enqueue_read_buffer : Command_queue.t -> Mem.t -> bool
