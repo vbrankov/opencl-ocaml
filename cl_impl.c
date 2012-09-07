@@ -164,7 +164,7 @@ void size_t_array_val(value v, size_t **a, size_t *length)
   for (i = 0; Is_block(v); i++)
   {
     assert(Tag_val(v) == 0);
-    *a[i] = Int_val(Field(v, 0));
+    (*a)[i] = Int_val(Field(v, 0));
     v = Field(v, 1);
   }
 }
@@ -275,7 +275,7 @@ value caml_get_platform_ids(value unit)
   caml_platforms = caml_alloc_tuple(num_platforms);
   for (i = 0; i < num_platforms; i++)
   {
-    Store_field(caml_platforms, i, caml_copy_nativeint((int) platforms[i]));
+    Store_field(caml_platforms, i, caml_copy_nativeint((long) platforms[i]));
   }
   free(platforms);
   
@@ -336,7 +336,7 @@ value caml_get_device_ids(value caml_platform, value caml_device_type)
   caml_devices = caml_alloc_tuple(num_devices);
   for (i = 0; i < num_devices; i++)
   {
-    Store_field(caml_devices, i, caml_copy_nativeint((int) devices[i]));
+    Store_field(caml_devices, i, caml_copy_nativeint((long) devices[i]));
   }
   free(devices);
   
@@ -420,9 +420,9 @@ void CL_CALLBACK pfn_notify_create_context(
 {
   CAMLlocal4(caml_pfn_notify, caml_errinfo, caml_private_info, caml_cb);
   
-  caml_pfn_notify = Field(*caml_pfn_notifies_create_context, (int) user_data);
+  caml_pfn_notify = Field(*caml_pfn_notifies_create_context, (long) user_data);
   caml_errinfo = caml_copy_string(errinfo);
-  caml_private_info = caml_copy_nativeint((int) private_info);
+  caml_private_info = caml_copy_nativeint((long) private_info);
   caml_cb = caml_copy_nativeint(cb);
   caml_callback3(caml_pfn_notify, caml_errinfo, caml_private_info, caml_cb);
 }
@@ -477,7 +477,7 @@ value caml_create_context(value caml_properties, value caml_devices,
   free(properties);
   free(devices);
   raise_cl_error(errcode);
-  caml_context = caml_copy_nativeint((int) context);
+  caml_context = caml_copy_nativeint((long) context);
   
   CAMLreturn(caml_context);
 }
@@ -499,7 +499,7 @@ value caml_create_command_queue(value caml_context, value caml_device,
   properties = cl_command_queue_properties_val(caml_properties);
   command_queue = clCreateCommandQueue(context, device, properties, &errcode);
   raise_cl_error(errcode);
-  caml_command_queue = caml_copy_nativeint((int) command_queue);
+  caml_command_queue = caml_copy_nativeint((long) command_queue);
   
   CAMLreturn(caml_command_queue);
 }
@@ -523,7 +523,7 @@ value caml_create_program_with_source(value caml_context, value caml_strings)
   for (i = 0; i < count; i++)
     free(strings + i);
   raise_cl_error(errcode);
-  caml_program = caml_copy_nativeint((int) program);
+  caml_program = caml_copy_nativeint((long) program);
   
   CAMLreturn(caml_program);
 }
@@ -535,7 +535,7 @@ void CL_CALLBACK pfn_notify_build_program(cl_program program, void *user_data)
   CAMLlocal2(caml_pfn_notify, caml_program);
   
   caml_pfn_notify = (value) user_data;
-  caml_program = caml_copy_nativeint((int) program);
+  caml_program = caml_copy_nativeint((long) program);
   // XXX If we're sure that the callback won't be called any more, delete it to
   // prevent leaks
   caml_callback(caml_pfn_notify, caml_program);
@@ -627,7 +627,7 @@ value caml_create_kernel(value caml_program, value caml_kernel_name)
   kernel_name = String_val(caml_kernel_name);
   kernel = clCreateKernel(program, kernel_name, &errcode);
   raise_cl_error(errcode);
-  caml_kernel = caml_copy_nativeint((int) kernel);
+  caml_kernel = caml_copy_nativeint((long) kernel);
   
   CAMLreturn(caml_kernel);
 }
@@ -674,7 +674,7 @@ value caml_create_buffer(value caml_context, value caml_flags,
   array1_val(caml_array1, &host_ptr, &size);
   mem = clCreateBuffer(context, flags, size, host_ptr, &errcode);
   raise_cl_error(errcode);
-  caml_mem = caml_copy_nativeint((int) mem);
+  caml_mem = caml_copy_nativeint((long) mem);
   
   CAMLreturn(caml_mem);
 }
@@ -734,7 +734,8 @@ value caml_enqueue_nd_range_kernel_native(
   command_queue = (cl_command_queue) Nativeint_val(caml_command_queue);
   kernel = (cl_kernel) Nativeint_val(caml_kernel);
   
-  size_t_array_val(caml_global_work_size, &global_work_size, &work_dim);
+  size_t_array_val(caml_global_work_size, &global_work_size, &i);
+  work_dim = i;
   size_t_array_option_val(caml_global_work_offset, &global_work_offset, &i);
   if (i != 0 && i != work_dim)
     caml_failwith("global_work_offset and global_work_size must be of equal dimensions");
@@ -759,7 +760,7 @@ value caml_enqueue_nd_range_kernel_native(
     free(event_wait_list);
   }
   raise_cl_error(errcode);
-  caml_event = caml_copy_nativeint((int) event);
+  caml_event = caml_copy_nativeint((long) event);
   
   CAMLreturn(caml_event);
 }
@@ -801,7 +802,7 @@ value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
   if (errcode != CL_SUCCESS)
     free(event_wait_list);
   raise_cl_error(errcode);
-  caml_event = caml_copy_nativeint((int) event);
+  caml_event = caml_copy_nativeint((long) event);
   
   CAMLreturn(caml_event);
 }

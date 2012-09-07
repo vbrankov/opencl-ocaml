@@ -1,10 +1,10 @@
 OPENCL_INCLUDE_DIR=/cygdrive/c/Program Files (x86)/AMD APP/include
 OPENCL_LIB_DIR=/cygdrive/c/Program Files (x86)/AMD APP/lib/x86
-SOURCES = cl.ml test.ml
+SOURCES = cl.ml
 
 all: cl.cmxa
 
-test.exe: cl.cmxa
+test.exe: cl.cmxa test.ml
 	@ocamlopt -o test.exe bigarray.cmxa cl.cmxa test.ml
 
 cl.cmxa: cl_impl.o $(SOURCES)
