@@ -3,7 +3,7 @@ open Bigarray
 let () =
   try
     let platforms = Cl.get_platform_ids () in
-    let platform = platforms.(0) in
+    let platform = List.hd platforms in
     List.iter (fun platform_info ->
       Printf.printf "%s\n%!" (Cl.get_platform_info platform platform_info))
       [Cl.Platform_info.PROFILE;
@@ -12,7 +12,7 @@ let () =
        Cl.Platform_info.VENDOR;
        Cl.Platform_info.EXTENSIONS];
     let devices = Cl.get_device_ids platform [Cl.Device_type.ALL] in
-    let device = devices.(0) in
+    let device = List.hd devices in
     let name = Cl.get_device_info device Cl.Device_info.name in
     Printf.printf "%s\n%!" name;
     let pfn_notify errinfo _ _ =

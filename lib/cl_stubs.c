@@ -243,6 +243,23 @@ value val_cl_program_binary_type(cl_program_binary_type t)
   }
 }
 
+value val_nativeint_list(long* a, size_t l)
+{
+  CAMLlocal2(h, new_h);
+  size_t i;
+  
+  h = Val_unit;
+  for (i = 0; i < l; i++)
+  {
+    new_h = caml_alloc_tuple(2);
+    Store_field(new_h, 0, caml_copy_nativeint((long) a[i]));
+    Store_field(new_h, 1, h);
+    h = new_h;
+  }
+  
+  return h;
+}
+
 void raise_cl_error(cl_int error)
 {
   value* exception;
@@ -262,7 +279,6 @@ value caml_get_platform_ids(value unit)
   cl_uint num_platforms;
   cl_platform_id* platforms;
   cl_int errcode;
-  int i;
   
   raise_cl_error(clGetPlatformIDs(0, NULL, &num_platforms));
   platforms = calloc(num_platforms, sizeof(cl_platform_id));
@@ -272,11 +288,7 @@ value caml_get_platform_ids(value unit)
   if (errcode != CL_SUCCESS)
     free(platforms);
   raise_cl_error(errcode);
-  caml_platforms = caml_alloc_tuple(num_platforms);
-  for (i = 0; i < num_platforms; i++)
-  {
-    Store_field(caml_platforms, i, caml_copy_nativeint((long) platforms[i]));
-  }
+  caml_platforms = val_nativeint_list((long*) platforms, num_platforms);
   free(platforms);
   
   CAMLreturn(caml_platforms);
@@ -321,7 +333,6 @@ value caml_get_device_ids(value caml_platform, value caml_device_type)
   cl_uint num_devices;
   cl_device_id* devices;
   cl_int errcode;
-  int i;
 
   platform = (cl_platform_id) Nativeint_val(caml_platform);
   device_type = cl_device_type_val(caml_device_type);
@@ -333,11 +344,7 @@ value caml_get_device_ids(value caml_platform, value caml_device_type)
   if (errcode != CL_SUCCESS)
     free(devices);
   raise_cl_error(errcode);
-  caml_devices = caml_alloc_tuple(num_devices);
-  for (i = 0; i < num_devices; i++)
-  {
-    Store_field(caml_devices, i, caml_copy_nativeint((long) devices[i]));
-  }
+  caml_devices = val_nativeint_list((long*) devices, num_devices);
   free(devices);
   
   CAMLreturn(caml_devices);

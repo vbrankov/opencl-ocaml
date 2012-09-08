@@ -334,12 +334,12 @@ end
 exception Cl_error of Cl_error.t
 let _ = Callback.register_exception "Cl_error" (Cl_error Cl_error.SUCCESS)
 
-external get_platform_ids : unit -> Platform_id.t array
+external get_platform_ids : unit -> Platform_id.t list
   = "caml_get_platform_ids"
 external get_platform_info : Platform_id.t -> Platform_info.t -> string
   = "caml_get_platform_info"
 external get_device_ids : Platform_id.t -> Device_type.t list
-  -> Device_id.t array = "caml_get_device_ids"
+  -> Device_id.t list = "caml_get_device_ids"
 external get_device_info : Device_id.t -> 'a Device_info.t -> 'a
   = "caml_get_device_info"
 external create_context : Context_properties.t list -> Device_id.t list
