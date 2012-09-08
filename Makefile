@@ -15,4 +15,4 @@ cl_stubs.o: cl_stubs.c
 	@ocamlopt -ccopt "-I\"$(OPENCL_INCLUDE_DIR)\"" -c cl_stubs.c
 
 clean:
-	@rm -f test.exe *.{a,cmi,cmo,cmx,cmxa,o}
+	@rm -f test.exe *.{a,cmi,cmo,cmx,cmxa,o,stackdump,tmp,tmp.dll}
