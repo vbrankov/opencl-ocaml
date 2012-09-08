@@ -740,7 +740,8 @@ value caml_set_kernel_arg(value caml_kernel, value caml_arg_index,
   cl_kernel kernel;
   cl_uint arg_index;
   size_t arg_size;
-  long arg_value[16]; // should be big enough to store the biggest value
+  long buf[16]; // should be big enough to store the biggest value
+  void *arg_value;
   int kind;
   
   kernel = (cl_kernel) Nativeint_val(caml_kernel);
@@ -752,11 +753,19 @@ value caml_set_kernel_arg(value caml_kernel, value caml_arg_index,
       kind = Int_val(data);
       data = Field(caml_arg_value, 1);
       arg_size = bigarray_element_size[kind];
-      set_bigarray_value(arg_value, 0, kind, data);
+      set_bigarray_value(buf, 0, kind, data);
+      arg_value = buf;
       break;
     case 1:
       arg_size = sizeof(cl_mem);
-      ((int*) arg_value)[0] = Nativeint_val(data);
+      ((int*) buf)[0] = Nativeint_val(data);
+      arg_value = buf;
+      break;
+    case 2:
+      kind = Int_val(data);
+      data = Field(caml_arg_value, 1);
+      arg_size = bigarray_element_size[kind] * Int_val(data);
+      arg_value = NULL;
       break;
     default:
       caml_failwith("unrecognized Arg_value");

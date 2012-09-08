@@ -323,6 +323,7 @@ module Arg_value = struct
   type ('a, 'b) t =
   | SCALAR of ('a, 'b) Bigarray.kind * 'a
   | MEM of ('a, 'b) Mem.t
+  | LOCAL of ('a, 'b) Bigarray.kind * 'a
 end
 
 module Buffer_contents = struct
