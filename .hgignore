@@ -1,9 +1,2 @@
-.a
-.cmi
-.cmo
-.cmx
-.exe
-.o
-.stackdump
-.tmp
-.tmp.dll
+syntax:glob
+*.{a,cmi,cmo,cmx,cmxa,exe,o,stackdump,tmp,tmp.dll}
