@@ -1,18 +1,23 @@
 OPENCL_INCLUDE_DIR=/cygdrive/c/Program Files (x86)/AMD APP/include
 OPENCL_LIB_DIR=/cygdrive/c/Program Files (x86)/AMD APP/lib/x86
-SOURCES = cl.ml
+EXAMPLES_SRC = $(wildcard examples/*.ml)
 
-all: cl.cmxa
+all: lib
 
-test.exe: cl.cmxa test.ml
-	@ocamlopt -o test.exe bigarray.cmxa cl.cmxa test.ml
+examples: $(EXAMPLES_SRC:%.ml=%.exe)
 
-cl.cmxa: cl_stubs.o $(SOURCES)
-	@ocamlopt -a -o cl.cmxa -ccopt "-L\"$(OPENCL_LIB_DIR)\"" -cclib -lOpenCL \
-		cl_stubs.o $(SOURCES)
+%.exe: lib/cl.cmxa %.ml
+	@ocamlopt -o $@ -I lib bigarray.cmxa $^
 
-cl_stubs.o: cl_stubs.c
-	@ocamlopt -ccopt "-I\"$(OPENCL_INCLUDE_DIR)\"" -c cl_stubs.c
+lib: lib/cl.cmxa
+
+lib/cl.cmxa: lib/cl_stubs.o lib/*.ml
+	@ocamlopt -a -o $@ -ccopt "-L\"$(OPENCL_LIB_DIR)\"" -cclib -lOpenCL $^
+
+%.o: %.c
+	@ocamlopt -ccopt "-o $@ -I\"$(OPENCL_INCLUDE_DIR)\"" -c $^
 
 clean:
-	@rm -f test.exe *.{a,cmi,cmo,cmx,cmxa,o,stackdump,tmp,tmp.dll}
+	@rm -f */*.{a,cmi,cmo,cmx,cmxa,exe,o,stackdump,tmp,tmp.dll}
+
+.PHONY: clean examples lib
