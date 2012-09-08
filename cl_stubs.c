@@ -902,3 +902,15 @@ value caml_release_mem_object(value caml_memobj)
   
   CAMLreturn(Val_unit);
 }
+
+value caml_release_program(value caml_program)
+{
+  CAMLparam1(caml_program);
+  
+  cl_program program;
+  
+  program = (cl_program) Nativeint_val(caml_program);
+  raise_cl_error(clReleaseProgram(program));
+  
+  CAMLreturn(Val_unit);
+}

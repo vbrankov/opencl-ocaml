@@ -78,6 +78,7 @@ let () =
       Printf.printf "%.2f " res_h.{i}
     done;
     Cl.release_kernel vector_add_k;
+    Cl.release_program program;
     Cl.release_command_queue queue;
     Cl.release_context context;
     Cl.release_mem_object(src_a_d);

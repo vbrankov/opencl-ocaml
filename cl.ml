@@ -374,3 +374,4 @@ external release_command_queue : Command_queue.t -> unit
 external release_context : Context.t -> unit = "caml_release_context"
 external release_mem_object : (_, _) Mem.t -> unit
   = "caml_release_mem_object"
+external release_program : Program.t -> unit = "caml_release_program"
