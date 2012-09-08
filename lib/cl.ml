@@ -368,6 +368,9 @@ external enqueue_nd_range_kernel : Command_queue.t -> Kernel.t
 external enqueue_read_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
   -> ('a, 'b) Host_mem.t -> Event.t list -> Event.t
   = "caml_enqueue_read_buffer"
+external enqueue_write_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
+  -> ('a, 'b) Host_mem.t -> Event.t list -> Event.t
+  = "caml_enqueue_write_buffer"
 external release_kernel : Kernel.t -> unit = "caml_release_kernel"
 external release_command_queue : Command_queue.t -> unit
   = "caml_release_command_queue"

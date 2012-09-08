@@ -855,6 +855,42 @@ value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
   CAMLreturn(caml_event);
 }
 
+value caml_enqueue_write_buffer(value caml_command_queue, value caml_buffer,
+  value caml_blocking_write, value caml_host_mem, value caml_event_wait_list)
+{
+  CAMLparam5(caml_command_queue, caml_buffer, caml_blocking_write, caml_host_mem,
+    caml_event_wait_list);
+  
+  CAMLlocal2(data, caml_event);
+  cl_command_queue command_queue;
+  cl_mem buffer;
+  cl_bool blocking_write;
+  size_t offset, size;
+  void *ptr;
+  cl_uint num_events_in_wait_list;
+  cl_event *event_wait_list;
+  cl_event event;
+  cl_int errcode;
+
+  command_queue = (cl_command_queue) Nativeint_val(caml_command_queue);
+  buffer = (cl_mem) Nativeint_val(caml_buffer);
+  blocking_write = Val_int(caml_blocking_write);
+  
+  offset = 0;
+  array1_val(Field(caml_host_mem, 0), &ptr, &size);
+  num_events_in_wait_list = list_length(caml_event_wait_list);
+  event_wait_list =
+    num_events_in_wait_list == 0 ? NULL : cl_event_val(caml_event_wait_list);
+  errcode = clEnqueueWriteBuffer(command_queue, buffer, blocking_write, offset,
+    size, ptr, num_events_in_wait_list, event_wait_list, &event);
+  if (errcode != CL_SUCCESS)
+    free(event_wait_list);
+  raise_cl_error(errcode);
+  caml_event = caml_copy_nativeint((long) event);
+  
+  CAMLreturn(caml_event);
+}
+
 value caml_release_kernel(value caml_kernel)
 {
   CAMLparam1(caml_kernel);

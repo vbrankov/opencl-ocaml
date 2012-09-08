@@ -54,8 +54,8 @@ let () =
       src_b_h.{i} <- Int32.of_int i
     done;
     let src_a_d = Cl.create_buffer context
-      Cl.Mem_flags.([READ_ONLY; COPY_HOST_PTR])
-      (Cl.Buffer_contents.HOST_MEM (Cl.Host_mem.ARRAY1 src_a_h))
+      Cl.Mem_flags.([READ_ONLY])
+      (Cl.Buffer_contents.SIZE (Bigarray.float32, size))
     in
     let src_b_d = Cl.create_buffer context
       Cl.Mem_flags.([READ_ONLY; COPY_HOST_PTR])
@@ -68,6 +68,9 @@ let () =
     Cl.set_kernel_arg vector_add_k 1 (Cl.Arg_value.MEM src_b_d);
     Cl.set_kernel_arg vector_add_k 2 (Cl.Arg_value.MEM res_d);
     Cl.set_kernel_arg vector_add_k 3 (Cl.Arg_value.SCALAR (int, size));
+    let _ =
+      Cl.enqueue_write_buffer queue src_a_d true (Cl.Host_mem.ARRAY1 src_a_h) []
+    in
     let _ =
       Cl.enqueue_nd_range_kernel queue vector_add_k None [size] (Some [16]) []
     in
