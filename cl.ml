@@ -310,11 +310,25 @@ module Program_build_info = struct
   let binary_type                       : Program_binary_type.t t = 0x1184
 end
 
+module Host_mem = struct
+	type ('a, 'b) t =
+  | GENARRAY of ('a, 'b, Bigarray.c_layout) Bigarray.Genarray.t
+  | ARRAY1 of ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t
+  | ARRAY2 of ('a, 'b, Bigarray.c_layout) Bigarray.Array2.t
+  | ARRAY3 of ('a, 'b, Bigarray.c_layout) Bigarray.Array3.t
+end
+
 module Arg_value = struct
   (* XXX Not all possible arguments are implemented *)
   type ('a, 'b) t =
   | SCALAR of ('a, 'b) Bigarray.kind * 'a
   | MEM of ('a, 'b) Mem.t
+end
+
+module Buffer_contents = struct
+  type ('a, 'b) t =
+  | SIZE of ('a, 'b) Bigarray.kind * int
+  | HOST_MEM of ('a, 'b) Host_mem.t
 end
 
 exception Cl_error of Cl_error.t
@@ -344,7 +358,7 @@ external create_kernel : Program.t -> string -> Kernel.t = "caml_create_kernel"
 (* XXX Different options are totally incompatible with Array1.t.  We should get
    all that in order. *)
 external create_buffer : Context.t -> Mem_flags.t list
-  -> ('a, 'b, _) Bigarray.Array1.t -> ('a, 'b) Mem.t = "caml_create_buffer"
+  -> ('a, 'b) Buffer_contents.t -> ('a, 'b) Mem.t = "caml_create_buffer"
 external set_kernel_arg : Kernel.t -> int -> (_, _) Arg_value.t -> unit
   = "caml_set_kernel_arg"
 external enqueue_nd_range_kernel : Command_queue.t -> Kernel.t
@@ -352,7 +366,7 @@ external enqueue_nd_range_kernel : Command_queue.t -> Kernel.t
   -> Event.t = "caml_enqueue_nd_range_kernel_bytecode"
   "caml_enqueue_nd_range_kernel_native"
 external enqueue_read_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
-  -> ('a, 'b, _) Bigarray.Array1.t -> Event.t list -> Event.t
+  -> ('a, 'b) Host_mem.t -> Event.t list -> Event.t
   = "caml_enqueue_read_buffer"
 external release_kernel : Kernel.t -> unit = "caml_release_kernel"
 external release_command_queue : Command_queue.t -> unit

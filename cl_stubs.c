@@ -654,10 +654,9 @@ void array1_val(value caml_array1, void **ptr, size_t *size)
   *ptr = array1->data;
 }
 
-value caml_create_buffer(value caml_context, value caml_flags,
-  value caml_array1)
+value caml_create_buffer(value caml_context, value caml_flags, value caml_src)
 {
-  CAMLparam3(caml_context, caml_flags, caml_array1);
+  CAMLparam3(caml_context, caml_flags, caml_src);
   
   CAMLlocal1(caml_mem);
   cl_context context;
@@ -669,7 +668,19 @@ value caml_create_buffer(value caml_context, value caml_flags,
   
   context = (cl_context) Nativeint_val(caml_context);
   flags = cl_mem_flags_val(caml_flags);
-  array1_val(caml_array1, &host_ptr, &size);
+  switch (Tag_val(caml_src))
+  {
+    case 0:
+      size = bigarray_element_size[Int_val(Field(caml_src, 0))] *
+             Int_val(Field(caml_src, 1));
+      host_ptr = NULL;
+      break;
+    case 1:
+      array1_val(Field(Field(caml_src, 0), 0), &host_ptr, &size);
+      break;
+    default:
+      assert(0);
+  }
   mem = clCreateBuffer(context, flags, size, host_ptr, &errcode);
   raise_cl_error(errcode);
   caml_mem = caml_copy_nativeint((long) mem);
@@ -809,9 +820,9 @@ value caml_enqueue_nd_range_kernel_bytecode(value *argv, int argn)
 }
 
 value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
-  value caml_blocking_read, value caml_array1, value caml_event_wait_list)
+  value caml_blocking_read, value caml_host_mem, value caml_event_wait_list)
 {
-  CAMLparam5(caml_command_queue, caml_buffer, caml_blocking_read, caml_array1,
+  CAMLparam5(caml_command_queue, caml_buffer, caml_blocking_read, caml_host_mem,
     caml_event_wait_list);
   
   CAMLlocal2(data, caml_event);
@@ -830,7 +841,7 @@ value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
   blocking_read = Val_int(caml_blocking_read);
   
   offset = 0;
-  array1_val(caml_array1, &ptr, &size);
+  array1_val(Field(caml_host_mem, 0), &ptr, &size);
   num_events_in_wait_list = list_length(caml_event_wait_list);
   event_wait_list =
     num_events_in_wait_list == 0 ? NULL : cl_event_val(caml_event_wait_list);

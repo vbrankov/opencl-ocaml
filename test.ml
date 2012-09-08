@@ -54,13 +54,15 @@ let () =
       src_b_h.{i} <- Int32.of_int i
     done;
     let src_a_d = Cl.create_buffer context
-      [Cl.Mem_flags.READ_ONLY; Cl.Mem_flags.COPY_HOST_PTR] src_a_h
+      Cl.Mem_flags.([READ_ONLY; COPY_HOST_PTR])
+      (Cl.Buffer_contents.HOST_MEM (Cl.Host_mem.ARRAY1 src_a_h))
     in
     let src_b_d = Cl.create_buffer context
-      [Cl.Mem_flags.READ_ONLY; Cl.Mem_flags.COPY_HOST_PTR] src_b_h
+      Cl.Mem_flags.([READ_ONLY; COPY_HOST_PTR])
+      (Cl.Buffer_contents.HOST_MEM (Cl.Host_mem.ARRAY1 src_b_h))
     in
-    let res_d = Cl.create_buffer context
-      [Cl.Mem_flags.WRITE_ONLY; Cl.Mem_flags.COPY_HOST_PTR] res_h
+    let res_d = Cl.create_buffer context Cl.Mem_flags.([WRITE_ONLY])
+      (Cl.Buffer_contents.SIZE (Bigarray.float32, size))
     in
     Cl.set_kernel_arg vector_add_k 0 (Cl.Arg_value.MEM src_a_d);
     Cl.set_kernel_arg vector_add_k 1 (Cl.Arg_value.MEM src_b_d);
@@ -69,7 +71,9 @@ let () =
     let _ =
       Cl.enqueue_nd_range_kernel queue vector_add_k None [size] (Some [16]) []
     in
-    let _ = Cl.enqueue_read_buffer queue res_d true res_h [] in
+    let _ =
+      Cl.enqueue_read_buffer queue res_d true (Cl.Host_mem.ARRAY1 res_h) []
+    in
     for i = 0 to size - 1 do
       Printf.printf "%.2f " res_h.{i}
     done;
