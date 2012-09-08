@@ -5,3 +5,5 @@
 .exe
 .o
 .stackdump
+.tmp
+.tmp.dll

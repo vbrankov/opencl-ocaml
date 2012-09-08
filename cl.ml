@@ -313,7 +313,7 @@ end
 module Arg_value = struct
   (* XXX Not all possible arguments are implemented *)
   type ('a, 'b) t =
-  | INT of int
+  | SCALAR of ('a, 'b) Bigarray.kind * 'a
   | MEM of ('a, 'b) Mem.t
 end
 

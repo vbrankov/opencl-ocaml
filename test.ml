@@ -1,3 +1,5 @@
+open Bigarray
+
 let () =
   try
     let platforms = Cl.get_platform_ids () in
@@ -44,9 +46,9 @@ let () =
       (Cl.Build_status.to_string build_status);
     let vector_add_k = Cl.create_kernel program "vector_add_gpu" in
     let size = 16 * 16 in
-    let src_a_h = Bigarray.(Array1.create float32 c_layout size) in
-    let src_b_h = Bigarray.(Array1.create int32 c_layout size) in
-    let res_h   = Bigarray.(Array1.create float32 c_layout size) in
+    let src_a_h = Array1.create float32 c_layout size in
+    let src_b_h = Array1.create int32 c_layout size in
+    let res_h   = Array1.create float32 c_layout size in
     for i = 0 to size - 1 do
       src_a_h.{i} <- float_of_int i;
       src_b_h.{i} <- Int32.of_int i
@@ -63,7 +65,7 @@ let () =
     Cl.set_kernel_arg vector_add_k 0 (Cl.Arg_value.MEM src_a_d);
     Cl.set_kernel_arg vector_add_k 1 (Cl.Arg_value.MEM src_b_d);
     Cl.set_kernel_arg vector_add_k 2 (Cl.Arg_value.MEM res_d);
-    Cl.set_kernel_arg vector_add_k 3 (Cl.Arg_value.INT size);
+    Cl.set_kernel_arg vector_add_k 3 (Cl.Arg_value.SCALAR (int, size));
     let _ =
       Cl.enqueue_nd_range_kernel queue vector_add_k None [size] (Some [16]) []
     in

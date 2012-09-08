@@ -632,27 +632,25 @@ value caml_create_kernel(value caml_program, value caml_kernel_name)
   CAMLreturn(caml_kernel);
 }
 
+/* Taken from bigarray_stubs.c from the OCaml compiler source.  I think that
+   this should've been exported. */
+/* Size in bytes of a bigarray element, indexed by bigarray kind */
+static int caml_ba_element_size[] =
+{ 4 /*FLOAT32*/, 8 /*FLOAT64*/,
+  1 /*SINT8*/, 1 /*UINT8*/,
+  2 /*SINT16*/, 2 /*UINT16*/,
+  4 /*INT32*/, 8 /*INT64*/,
+  sizeof(value) /*CAML_INT*/, sizeof(value) /*NATIVE_INT*/,
+  8 /*COMPLEX32*/, 16 /*COMPLEX64*/
+};
+
 void array1_val(value caml_array1, void **ptr, size_t *size)
 {
   struct caml_ba_array *array1;
-  size_t elt_size;
   
   array1 = Bigarray_val(caml_array1);
-  switch (array1->flags & BIGARRAY_KIND_MASK)
-  {
-    case BIGARRAY_FLOAT32:    elt_size = 4; break;
-    case BIGARRAY_FLOAT64:    elt_size = 8; break;
-    case BIGARRAY_SINT8:
-    case BIGARRAY_UINT8:      elt_size = 1; break;
-    case BIGARRAY_SINT16:
-    case BIGARRAY_UINT16:     elt_size = 2; break;
-    case BIGARRAY_INT32:      elt_size = 4; break;
-    case BIGARRAY_INT64:      elt_size = 8; break;
-    case BIGARRAY_CAML_INT:   elt_size = sizeof(int); break;
-    case BIGARRAY_NATIVE_INT: elt_size = sizeof(int); break;
-    default: caml_failwith("unrecognized Array1 kind");
-  }
-  *size = array1->dim[0] * elt_size;
+  *size =
+    array1->dim[0] * bigarray_element_size[array1->flags & BIGARRAY_KIND_MASK];
   *ptr = array1->data;
 }
 
@@ -679,6 +677,42 @@ value caml_create_buffer(value caml_context, value caml_flags,
   CAMLreturn(caml_mem);
 }
 
+void set_bigarray_value(void* ptr, int offset, int kind, value val)
+{
+  switch (kind) {
+  default:
+    caml_failwith("Unrecognized bigarray kind");
+  case CAML_BA_FLOAT32:
+    ((float *) ptr)[offset] = Double_val(val); break;
+  case CAML_BA_FLOAT64:
+    ((double *) ptr)[offset] = Double_val(val); break;
+  case CAML_BA_SINT8:
+  case CAML_BA_UINT8:
+    ((int8 *) ptr)[offset] = Int_val(val); break;
+  case CAML_BA_SINT16:
+  case CAML_BA_UINT16:
+    ((int16 *) ptr)[offset] = Int_val(val); break;
+  case CAML_BA_INT32:
+    ((int32 *) ptr)[offset] = Int32_val(val); break;
+  case CAML_BA_INT64:
+    ((int64 *) ptr)[offset] = Int64_val(val); break;
+  case CAML_BA_NATIVE_INT:
+    ((intnat *) ptr)[offset] = Nativeint_val(val); break;
+  case CAML_BA_CAML_INT:
+    ((intnat *) ptr)[offset] = Long_val(val); break;
+  case CAML_BA_COMPLEX32:
+    { float * p = ((float *) ptr) + offset * 2;
+      p[0] = Double_field(val, 0);
+      p[1] = Double_field(val, 1);
+      break; }
+  case CAML_BA_COMPLEX64:
+    { double * p = ((double *) ptr) + offset * 2;
+      p[0] = Double_field(val, 0);
+      p[1] = Double_field(val, 1);
+      break; }
+  }
+}
+
 value caml_set_kernel_arg(value caml_kernel, value caml_arg_index,
   value caml_arg_value)
 {
@@ -688,7 +722,8 @@ value caml_set_kernel_arg(value caml_kernel, value caml_arg_index,
   cl_kernel kernel;
   cl_uint arg_index;
   size_t arg_size;
-  int arg_value;
+  long arg_value[16]; // should be big enough to store the biggest value
+  int kind;
   
   kernel = (cl_kernel) Nativeint_val(caml_kernel);
   arg_index = Int_val(caml_arg_index);
@@ -696,17 +731,19 @@ value caml_set_kernel_arg(value caml_kernel, value caml_arg_index,
   switch (Tag_val(caml_arg_value))
   {
     case 0:
-      arg_size = sizeof(int);
-      arg_value = Int_val(data);
+      kind = Int_val(data);
+      data = Field(caml_arg_value, 1);
+      arg_size = bigarray_element_size[kind];
+      set_bigarray_value(arg_value, 0, kind, data);
       break;
     case 1:
       arg_size = sizeof(cl_mem);
-      arg_value = Nativeint_val(data);
+      ((int*) arg_value)[0] = Nativeint_val(data);
       break;
     default:
       caml_failwith("unrecognized Arg_value");
   }
-  raise_cl_error(clSetKernelArg(kernel, arg_index, arg_size, &arg_value));
+  raise_cl_error(clSetKernelArg(kernel, arg_index, arg_size, arg_value));
   
   CAMLreturn(Val_unit);
 }
