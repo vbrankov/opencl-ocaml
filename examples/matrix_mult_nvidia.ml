@@ -91,7 +91,7 @@ let () =
     let c = Array2.create float32 c_layout hA wB in
     for i = 0 to hA - 1 do
       for j = 0 to wA - 1 do
-        a.{i, j} <- float_of_int i /. float_of_int (j + 1)
+        a.{i, j} <- float_of_int (i + 1) /. float_of_int (j + 1)
       done
     done;
     for i = 0 to hB - 1 do
