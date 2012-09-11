@@ -3,7 +3,7 @@ OPENCL_LIB_DIR=/cygdrive/c/Program Files (x86)/AMD APP/lib/x86
 LIB_SRC = $(wildcard lib/*.mli)
 EXAMPLES_SRC = $(wildcard examples/*.ml)
 
-all: lib
+all: lib examples doc
 
 examples: $(EXAMPLES_SRC:%.ml=%.exe)
 
@@ -22,8 +22,12 @@ lib/%.cmi: lib/%.mli
 %.o: %.c
 	@ocamlopt -ccopt "-o $@ -I\"$(OPENCL_INCLUDE_DIR)\"" -c $^
 
-clean:
-	@rm -f */*.{a,cmi,cmo,cmx,cmxa,exe,o,stackdump,tmp,tmp.dll}
+doc:
+	@mkdir -p doc
+	@ocamldoc -html -d doc lib/*.mli
 
-.PHONY : clean examples lib
+clean:
+	@rm -f */*.{a,cmi,cmo,cmx,cmxa,css,exe,html,o,stackdump,tmp,tmp.dll}
+
+.PHONY : clean doc examples lib
 .PRECIOUS : %.cmi

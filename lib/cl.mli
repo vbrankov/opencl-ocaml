@@ -270,31 +270,51 @@ end
 
 exception Cl_error of Cl_error.t
 
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetPlatformIDs.html } Kronos Doc} *)
 val get_platform_ids : unit -> Platform_id.t list
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetPlatformInfo.html } Kronos Doc} *)
 val get_platform_info : Platform_id.t -> Platform_info.t -> string
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetDeviceIDs.html } Kronos Doc} *)
 val get_device_ids : Platform_id.t -> Device_type.t list -> Device_id.t list
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetDeviceInfo.html } Kronos Doc} *)
 val get_device_info : Device_id.t -> 'a Device_info.t -> 'a
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clCreateContext.html } Kronos Doc} *)
 val create_context : Context_properties.t list -> Device_id.t list
   -> (string -> int64 -> int64 -> unit) -> Context.t
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clCreateCommandQueue.html } Kronos Doc} *)
 val create_command_queue : Context.t -> Device_id.t
   -> Command_queue_properties.t list -> Command_queue.t
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clCreateProgramWithSource.html } Kronos Doc} *)
 val create_program_with_source : Context.t -> string list -> Program.t
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clBuildProgram.html } Kronos Doc} *)
 val build_program : Program.t -> Device_id.t list -> string
   -> (Program.t -> unit) -> unit
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetProgramBuildInfo.html } Kronos Doc} *)
 val get_program_build_info : Program.t -> Device_id.t -> 'a Program_build_info.t
   -> 'a
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clCreateKernel.html } Kronos Doc} *)
 val create_kernel : Program.t -> string -> Kernel.t
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clCreateBuffer.html } Kronos Doc} *)
 val create_buffer : Context.t -> Mem_flags.t list
   -> ('a, 'b) Buffer_contents.t -> ('a, 'b) Mem.t
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clSetKernelArg.html } Kronos Doc} *)
 val set_kernel_arg : Kernel.t -> int -> (_, _) Arg_value.t -> unit
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clEnqueueNDRangeKernel.html } Kronos Doc} *)
 val enqueue_nd_range_kernel : Command_queue.t -> Kernel.t -> int list option
   -> int list -> int list option -> Event.t list -> Event.t
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clEnqueueReadBuffer.html } Kronos Doc} *)
 val enqueue_read_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
   -> ('a, 'b) Host_mem.t -> Event.t list -> Event.t
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clEnqueueWriteBuffer.html } Kronos Doc} *)
 val enqueue_write_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
   -> ('a, 'b) Host_mem.t -> Event.t list -> Event.t
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clReleaseKernel.html } Kronos Doc} *)
 val release_kernel : Kernel.t -> unit
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clReleaseCommandQueue.html } Kronos Doc} *)
 val release_command_queue : Command_queue.t -> unit
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clReleaseContext.html } Kronos Doc} *)
 val release_context : Context.t -> unit
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clReleaseMemObject.html } Kronos Doc} *)
 val release_mem_object : (_, _) Mem.t -> unit
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clReleaseProgram.html } Kronos Doc} *)
 val release_program : Program.t -> unit
