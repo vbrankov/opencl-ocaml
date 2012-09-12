@@ -14,12 +14,12 @@ void vecadd(__global int *A,
 let () =
   try
     let elements = 2048 in
-    let a = Array1.create int c_layout elements in
-    let b = Array1.create int c_layout elements in
-    let c = Array1.create int c_layout elements in
+    let a = Array1.create int32 c_layout elements in
+    let b = Array1.create int32 c_layout elements in
+    let c = Array1.create int32 c_layout elements in
     for i = 0 to elements - 1 do
-      a.{i} <- i;
-      b.{i} <- i
+      a.{i} <- Int32.of_int i;
+      b.{i} <- Int32.of_int i
     done;
     
     let platforms = Cl.get_platform_ids () in
@@ -27,13 +27,13 @@ let () =
     let context = Cl.create_context [] devices (fun _ _ _ -> ()) in
     let cmd_queue = Cl.create_command_queue context (List.hd devices) [] in
     let buffer_a = Cl.create_buffer context [Cl.Mem_flags.READ_ONLY]
-      (Cl.Buffer_contents.SIZE (int, elements))
+      (Cl.Buffer_contents.SIZE (int32, elements))
     in
     let buffer_b = Cl.create_buffer context [Cl.Mem_flags.READ_ONLY]
-      (Cl.Buffer_contents.SIZE (int, elements))
+      (Cl.Buffer_contents.SIZE (int32, elements))
     in
     let buffer_c = Cl.create_buffer context [Cl.Mem_flags.WRITE_ONLY]
-      (Cl.Buffer_contents.SIZE (int, elements))
+      (Cl.Buffer_contents.SIZE (int32, elements))
     in
     let _ =
       Cl.enqueue_write_buffer cmd_queue buffer_a true (Cl.Host_mem.ARRAY1 a) []
@@ -55,7 +55,7 @@ let () =
     in
     
     for i = 0 to elements - 1 do
-      if c.{i} <> i + i then
+      if Int32.to_int c.{i} <> i + i then
         failwith "Output is incorrect"
     done;
     Printf.printf "Output is correct\n"

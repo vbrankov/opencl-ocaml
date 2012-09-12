@@ -126,9 +126,9 @@ let () =
       (Cl.Arg_value.LOCAL (float32, block_size * block_size));
     Cl.set_kernel_arg kernel 4
       (Cl.Arg_value.LOCAL (float32, block_size * block_size));
-    Cl.set_kernel_arg kernel 5 (Cl.Arg_value.SCALAR (int, wA));
-    Cl.set_kernel_arg kernel 6 (Cl.Arg_value.SCALAR (int, wB));
-    Cl.set_kernel_arg kernel 7 (Cl.Arg_value.SCALAR (int, hA));
+    Cl.set_kernel_arg kernel 5 (Cl.Arg_value.SCALAR (int32, Int32.of_int wA));
+    Cl.set_kernel_arg kernel 6 (Cl.Arg_value.SCALAR (int32, Int32.of_int wB));
+    Cl.set_kernel_arg kernel 7 (Cl.Arg_value.SCALAR (int32, Int32.of_int hA));
     
     let _ =
       Cl.enqueue_nd_range_kernel cmd_queue kernel None [wA; hB]

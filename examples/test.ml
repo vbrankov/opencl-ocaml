@@ -67,7 +67,8 @@ let () =
     Cl.set_kernel_arg vector_add_k 0 (Cl.Arg_value.MEM src_a_d);
     Cl.set_kernel_arg vector_add_k 1 (Cl.Arg_value.MEM src_b_d);
     Cl.set_kernel_arg vector_add_k 2 (Cl.Arg_value.MEM res_d);
-    Cl.set_kernel_arg vector_add_k 3 (Cl.Arg_value.SCALAR (int, size));
+    Cl.set_kernel_arg vector_add_k 3
+      (Cl.Arg_value.SCALAR (int32, Int32.of_int size));
     let _ =
       Cl.enqueue_write_buffer queue src_a_d true (Cl.Host_mem.ARRAY1 src_a_h) []
     in

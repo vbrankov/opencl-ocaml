@@ -60,10 +60,10 @@ let () =
     Cl.build_program program devices "" (fun _ -> ());
     let kernel = Cl.create_kernel program "simple_multiply" in
     Cl.set_kernel_arg kernel 0 (Cl.Arg_value.MEM buffer_c);
-    Cl.set_kernel_arg kernel 1 (Cl.Arg_value.SCALAR (int, wA));
-    Cl.set_kernel_arg kernel 2 (Cl.Arg_value.SCALAR (int, hA));
-    Cl.set_kernel_arg kernel 3 (Cl.Arg_value.SCALAR (int, wB));
-    Cl.set_kernel_arg kernel 4 (Cl.Arg_value.SCALAR (int, hB));
+    Cl.set_kernel_arg kernel 1 (Cl.Arg_value.SCALAR (int32, Int32.of_int wA));
+    Cl.set_kernel_arg kernel 2 (Cl.Arg_value.SCALAR (int32, Int32.of_int hA));
+    Cl.set_kernel_arg kernel 3 (Cl.Arg_value.SCALAR (int32, Int32.of_int wB));
+    Cl.set_kernel_arg kernel 4 (Cl.Arg_value.SCALAR (int32, Int32.of_int hB));
     Cl.set_kernel_arg kernel 5 (Cl.Arg_value.MEM buffer_a);
     Cl.set_kernel_arg kernel 6 (Cl.Arg_value.MEM buffer_b);
     
