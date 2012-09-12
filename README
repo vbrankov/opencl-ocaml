@@ -1,0 +1,27 @@
+OpenCL-OCaml Readme
+
+Table of Contents
+------------------
+1. Overview
+2. Building
+
+
+
+1. Overview
+------------------
+OpenCL-OCaml is OCaml binding for OpenCL.  It currently has implemented the most
+important OpenCL calls.  See examples for usage.
+
+
+2. Building
+------------------
+To build the library do:
+
+    make
+
+If OpenCL library cannot be found modify Makefile's OPENCL_LIB_DIR.
+
+To build examples and documentation do:
+
+    make examples
+    make doc
