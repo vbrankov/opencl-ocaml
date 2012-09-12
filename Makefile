@@ -3,7 +3,7 @@ OPENCL_LIB_DIR=/cygdrive/c/Program Files (x86)/AMD APP/lib/x86
 LIB_SRC = $(wildcard lib/*.mli)
 EXAMPLES_SRC = $(wildcard examples/*.ml)
 
-all: lib examples doc
+all: lib
 
 examples: $(EXAMPLES_SRC:%.ml=%.exe)
 
