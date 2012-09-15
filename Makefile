@@ -21,7 +21,7 @@ lib/%.cmi: lib/%.mli
 	@ocamlopt $^
 	
 %.o: %.c
-	@ocamlopt -ccopt "-o $@ -I. -c $^
+	@ocamlopt -ccopt "-o $@ -I." -c $^
 
 doc:
 	@mkdir -p doc
