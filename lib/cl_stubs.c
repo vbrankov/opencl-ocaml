@@ -659,7 +659,7 @@ void array_val(value caml_array, void **ptr, size_t *size)
   array = Bigarray_val(caml_array);
   *size = bigarray_element_size[array->flags & BIGARRAY_KIND_MASK];
   for (i = 0; i < array->num_dims; i++)
-    *size *= array->dim[1];
+    *size *= array->dim[i];
   *ptr = array->data;
 }
 

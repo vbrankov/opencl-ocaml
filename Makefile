@@ -1,5 +1,5 @@
 # Modify these if OpenCL is not installed in a standard folder
-OPENCL_LIB_DIR=.
+OPENCL_LIB_DIR=/cygdrive/c/Program Files (x86)/AMD APP/lib/x86
 
 LIB_SRC = $(wildcard lib/*.mli)
 EXAMPLES_SRC = $(wildcard examples/*.ml)
