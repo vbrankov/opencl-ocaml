@@ -302,6 +302,7 @@ val set_kernel_arg : Kernel.t -> int -> (_, _) Arg_value.t -> unit
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clEnqueueNDRangeKernel.html } Kronos Doc} *)
 val enqueue_nd_range_kernel : Command_queue.t -> Kernel.t -> int list option
   -> int list -> int list option -> Event.t list -> Event.t
+(* XXX Try to support offset. *)
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clEnqueueReadBuffer.html } Kronos Doc} *)
 val enqueue_read_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
   -> ('a, 'b) Host_mem.t -> Event.t list -> Event.t
@@ -318,3 +319,5 @@ val release_context : Context.t -> unit
 val release_mem_object : (_, _) Mem.t -> unit
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clReleaseProgram.html } Kronos Doc} *)
 val release_program : Program.t -> unit
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clWaitForEvents.html } Kronos Doc} *)
+val wait_for_events : Event.t list -> unit

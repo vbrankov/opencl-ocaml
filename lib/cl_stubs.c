@@ -968,3 +968,17 @@ value caml_release_program(value caml_program)
   
   CAMLreturn(Val_unit);
 }
+
+value caml_wait_for_events(value caml_event_list)
+{
+  CAMLparam1(caml_event_list);
+  
+  cl_uint num_events;
+  cl_event *event_list;
+  
+  num_events = list_length(caml_event_list);
+  event_list = num_events == 0 ? NULL : cl_event_val(caml_event_list);
+  raise_cl_error(clWaitForEvents(num_events, event_list));
+  
+  CAMLreturn(Val_unit);
+}

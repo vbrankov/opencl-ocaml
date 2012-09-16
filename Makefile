@@ -9,7 +9,7 @@ all: lib
 examples: $(EXAMPLES_SRC:%.ml=%.exe)
 
 %.exe: lib/cl.cmxa %.ml
-	@ocamlopt -o $@ -I lib bigarray.cmxa $^
+	@ocamlopt -o $@ -ccopt "-L\"$(OPENCL_LIB_DIR)\"" -I lib bigarray.cmxa $^
 
 lib: lib/cl.cmxa
 
