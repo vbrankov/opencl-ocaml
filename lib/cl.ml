@@ -361,11 +361,11 @@ external enqueue_nd_range_kernel : Command_queue.t -> Kernel.t
   -> Event.t = "caml_enqueue_nd_range_kernel_bytecode"
   "caml_enqueue_nd_range_kernel_native"
 external enqueue_read_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
-  -> ('a, 'b, _) Genarray.t -> Event.t list -> Event.t
-  = "caml_enqueue_read_buffer"
+  -> ?offset:int -> ('a, 'b, _) Genarray.t -> Event.t list -> Event.t
+  = "caml_enqueue_read_buffer_bytecode" "caml_enqueue_read_buffer_native"
 external enqueue_write_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
-  -> ('a, 'b, _) Genarray.t -> Event.t list -> Event.t
-  = "caml_enqueue_write_buffer"
+  -> ?offset:int -> ('a, 'b, _) Genarray.t -> Event.t list -> Event.t
+  = "caml_enqueue_write_buffer_bytecode" "caml_enqueue_write_buffer_native"
 external release_kernel : Kernel.t -> unit = "caml_release_kernel"
 external release_command_queue : Command_queue.t -> unit
   = "caml_release_command_queue"

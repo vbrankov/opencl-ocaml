@@ -297,10 +297,10 @@ val enqueue_nd_range_kernel : Command_queue.t -> Kernel.t -> int list option
 (* XXX Try to support offset. *)
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clEnqueueReadBuffer.html } Kronos Doc} *)
 val enqueue_read_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
-  -> ('a, 'b, _) Bigarray.Genarray.t -> Event.t list -> Event.t
+  -> ?offset:int -> ('a, 'b, _) Bigarray.Genarray.t -> Event.t list -> Event.t
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clEnqueueWriteBuffer.html } Kronos Doc} *)
 val enqueue_write_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
-  -> ('a, 'b, _) Bigarray.Genarray.t -> Event.t list -> Event.t
+  -> ?offset:int -> ('a, 'b, _) Bigarray.Genarray.t -> Event.t list -> Event.t
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clReleaseKernel.html } Kronos Doc} *)
 val release_kernel : Kernel.t -> unit
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clReleaseCommandQueue.html } Kronos Doc} *)

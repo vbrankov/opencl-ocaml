@@ -837,11 +837,13 @@ value caml_enqueue_nd_range_kernel_bytecode(value *argv, int argn)
     argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
 }
 
-value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
-  value caml_blocking_read, value caml_genarray, value caml_event_wait_list)
+value caml_enqueue_read_buffer_native(value caml_command_queue,
+  value caml_buffer, value caml_blocking_read, value caml_offset_opt,
+  value caml_genarray, value caml_event_wait_list)
 {
-  CAMLparam5(caml_command_queue, caml_buffer, caml_blocking_read, caml_genarray,
-    caml_event_wait_list);
+  CAMLparam5(caml_command_queue, caml_buffer, caml_blocking_read,
+    caml_offset_opt, caml_genarray);
+  CAMLxparam1(caml_event_wait_list);
   
   CAMLlocal2(data, caml_event);
   cl_command_queue command_queue;
@@ -858,7 +860,14 @@ value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
   buffer = (cl_mem) Nativeint_val(caml_buffer);
   blocking_read = Val_int(caml_blocking_read);
   
-  offset = 0;
+  if (Is_block(caml_offset_opt))
+  {
+    offset = Int_val(Field(caml_offset_opt, 0));
+  }
+  else
+  {
+    offset = 0;
+  }
   array_val(caml_genarray, &ptr, &size);
   num_events_in_wait_list = list_length(caml_event_wait_list);
   event_wait_list =
@@ -873,11 +882,19 @@ value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
   CAMLreturn(caml_event);
 }
 
-value caml_enqueue_write_buffer(value caml_command_queue, value caml_buffer,
-  value caml_blocking_write, value caml_genarray, value caml_event_wait_list)
+value caml_enqueue_read_buffer_bytecode(value *argv, int argn)
+{
+  return caml_enqueue_read_buffer_native(
+    argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
+}
+
+value caml_enqueue_write_buffer_native(value caml_command_queue,
+  value caml_buffer, value caml_blocking_write, value caml_offset_opt,
+  value caml_genarray, value caml_event_wait_list)
 {
   CAMLparam5(caml_command_queue, caml_buffer, caml_blocking_write,
-    caml_genarray, caml_event_wait_list);
+    caml_offset_opt, caml_genarray);
+  CAMLxparam1(caml_event_wait_list);
   
   CAMLlocal2(data, caml_event);
   cl_command_queue command_queue;
@@ -894,7 +911,14 @@ value caml_enqueue_write_buffer(value caml_command_queue, value caml_buffer,
   buffer = (cl_mem) Nativeint_val(caml_buffer);
   blocking_write = Val_int(caml_blocking_write);
   
-  offset = 0;
+  if (Is_block(caml_offset_opt))
+  {
+    offset = Int_val(Field(caml_offset_opt, 0));
+  }
+  else
+  {
+    offset = 0;
+  }
   array_val(caml_genarray, &ptr, &size);
   num_events_in_wait_list = list_length(caml_event_wait_list);
   event_wait_list =
@@ -907,6 +931,12 @@ value caml_enqueue_write_buffer(value caml_command_queue, value caml_buffer,
   caml_event = caml_copy_nativeint((long) event);
   
   CAMLreturn(caml_event);
+}
+
+value caml_enqueue_write_buffer_bytecode(value *argv, int argn)
+{
+  return caml_enqueue_write_buffer_native(
+    argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
 }
 
 value caml_release_kernel(value caml_kernel)
