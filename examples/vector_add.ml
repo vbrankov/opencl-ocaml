@@ -36,10 +36,10 @@ let () =
       (Cl.Buffer_contents.SIZE (int32, elements))
     in
     let _ =
-      Cl.enqueue_write_buffer cmd_queue buffer_a true (Cl.Host_mem.ARRAY1 a) []
+      Cl.enqueue_write_buffer cmd_queue buffer_a true (genarray_of_array1 a) []
     in
     let _ =
-      Cl.enqueue_write_buffer cmd_queue buffer_b true (Cl.Host_mem.ARRAY1 b) []
+      Cl.enqueue_write_buffer cmd_queue buffer_b true (genarray_of_array1 b) []
     in
     let program = Cl.create_program_with_source context [program_source] in
     Cl.build_program program devices "" (fun _ -> ());
@@ -51,7 +51,7 @@ let () =
     let _ = Cl.enqueue_nd_range_kernel cmd_queue kernel None [elements] None []
     in
     let _ =
-      Cl.enqueue_read_buffer cmd_queue buffer_c true (Cl.Host_mem.ARRAY1 c) []
+      Cl.enqueue_read_buffer cmd_queue buffer_c true (genarray_of_array1 c) []
     in
     
     for i = 0 to elements - 1 do

@@ -59,7 +59,7 @@ let () =
     in
     let src_b_d = Cl.create_buffer context
       Cl.Mem_flags.([READ_ONLY; COPY_HOST_PTR])
-      (Cl.Buffer_contents.HOST_MEM (Cl.Host_mem.ARRAY1 src_b_h))
+      (Cl.Buffer_contents.HOST_MEM (genarray_of_array1 src_b_h))
     in
     let res_d = Cl.create_buffer context Cl.Mem_flags.([WRITE_ONLY])
       (Cl.Buffer_contents.SIZE (Bigarray.float32, size))
@@ -70,13 +70,13 @@ let () =
     Cl.set_kernel_arg vector_add_k 3
       (Cl.Arg_value.SCALAR (int32, Int32.of_int size));
     let _ =
-      Cl.enqueue_write_buffer queue src_a_d true (Cl.Host_mem.ARRAY1 src_a_h) []
+      Cl.enqueue_write_buffer queue src_a_d true (genarray_of_array1 src_a_h) []
     in
     let _ =
       Cl.enqueue_nd_range_kernel queue vector_add_k None [size] (Some [16]) []
     in
     let _ =
-      Cl.enqueue_read_buffer queue res_d true (Cl.Host_mem.ARRAY1 res_h) []
+      Cl.enqueue_read_buffer queue res_d true (genarray_of_array1 res_h) []
     in
     for i = 0 to size - 1 do
       Printf.printf "%.2f " res_h.{i}

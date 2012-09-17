@@ -106,15 +106,15 @@ let () =
     let cmd_queue = Cl.create_command_queue context (List.hd devices) [] in
     let buffer_a = Cl.create_buffer context
       Cl.Mem_flags.([READ_ONLY; USE_HOST_PTR])
-      (Cl.Buffer_contents.HOST_MEM (Cl.Host_mem.ARRAY2 a))
+      (Cl.Buffer_contents.HOST_MEM (genarray_of_array2 a))
     in
     let buffer_b = Cl.create_buffer context
       Cl.Mem_flags.([READ_ONLY; USE_HOST_PTR])
-      (Cl.Buffer_contents.HOST_MEM (Cl.Host_mem.ARRAY2 b))
+      (Cl.Buffer_contents.HOST_MEM (genarray_of_array2 b))
     in
     let buffer_c = Cl.create_buffer context
       Cl.Mem_flags.([WRITE_ONLY; USE_HOST_PTR])
-      (Cl.Buffer_contents.HOST_MEM (Cl.Host_mem.ARRAY2 c))
+      (Cl.Buffer_contents.HOST_MEM (genarray_of_array2 c))
     in
     let program = Cl.create_program_with_source context [program_source] in
     Cl.build_program program devices "" (fun _ -> ());
@@ -135,7 +135,7 @@ let () =
         (Some [block_size; block_size]) []
     in
     let _ =
-      Cl.enqueue_read_buffer cmd_queue buffer_c true (Cl.Host_mem.ARRAY2 c) []
+      Cl.enqueue_read_buffer cmd_queue buffer_c true (genarray_of_array2 c) []
     in
     
     for i = 0 to hB - 1 do

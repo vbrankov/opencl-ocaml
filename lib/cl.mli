@@ -246,14 +246,6 @@ module Program_build_info : sig
   val binary_type   : Program_binary_type.t t
 end
 
-module Host_mem : sig
-	type ('a, 'b) t =
-  | GENARRAY of ('a, 'b, Bigarray.c_layout) Bigarray.Genarray.t
-  | ARRAY1 of ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t
-  | ARRAY2 of ('a, 'b, Bigarray.c_layout) Bigarray.Array2.t
-  | ARRAY3 of ('a, 'b, Bigarray.c_layout) Bigarray.Array3.t
-end
-
 module Arg_value : sig
   (* XXX Not all possible arguments are implemented *)
   type ('a, 'b) t =
@@ -265,7 +257,7 @@ end
 module Buffer_contents : sig
   type ('a, 'b) t =
   | SIZE of ('a, 'b) Bigarray.kind * int
-  | HOST_MEM of ('a, 'b) Host_mem.t
+  | HOST_MEM of ('a, 'b, Bigarray.c_layout) Bigarray.Genarray.t
 end
 
 exception Cl_error of Cl_error.t
@@ -305,10 +297,10 @@ val enqueue_nd_range_kernel : Command_queue.t -> Kernel.t -> int list option
 (* XXX Try to support offset. *)
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clEnqueueReadBuffer.html } Kronos Doc} *)
 val enqueue_read_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
-  -> ('a, 'b) Host_mem.t -> Event.t list -> Event.t
+  -> ('a, 'b, _) Bigarray.Genarray.t -> Event.t list -> Event.t
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clEnqueueWriteBuffer.html } Kronos Doc} *)
 val enqueue_write_buffer : Command_queue.t -> ('a, 'b) Mem.t -> bool
-  -> ('a, 'b) Host_mem.t -> Event.t list -> Event.t
+  -> ('a, 'b, _) Bigarray.Genarray.t -> Event.t list -> Event.t
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clReleaseKernel.html } Kronos Doc} *)
 val release_kernel : Kernel.t -> unit
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clReleaseCommandQueue.html } Kronos Doc} *)

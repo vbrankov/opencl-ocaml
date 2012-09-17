@@ -651,12 +651,12 @@ static int caml_ba_element_size[] =
   8 /*COMPLEX32*/, 16 /*COMPLEX64*/
 };
 
-void array_val(value caml_array, void **ptr, size_t *size)
+void array_val(value caml_genarray, void **ptr, size_t *size)
 {
   struct caml_ba_array *array;
   int i;
   
-  array = Bigarray_val(caml_array);
+  array = Bigarray_val(caml_genarray);
   *size = bigarray_element_size[array->flags & BIGARRAY_KIND_MASK];
   for (i = 0; i < array->num_dims; i++)
     *size *= array->dim[i];
@@ -685,7 +685,7 @@ value caml_create_buffer(value caml_context, value caml_flags, value caml_src)
       host_ptr = NULL;
       break;
     case 1:
-      array_val(Field(Field(caml_src, 0), 0), &host_ptr, &size);
+      array_val(Field(caml_src, 0), &host_ptr, &size);
       break;
     default:
       assert(0);
@@ -838,9 +838,9 @@ value caml_enqueue_nd_range_kernel_bytecode(value *argv, int argn)
 }
 
 value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
-  value caml_blocking_read, value caml_host_mem, value caml_event_wait_list)
+  value caml_blocking_read, value caml_genarray, value caml_event_wait_list)
 {
-  CAMLparam5(caml_command_queue, caml_buffer, caml_blocking_read, caml_host_mem,
+  CAMLparam5(caml_command_queue, caml_buffer, caml_blocking_read, caml_genarray,
     caml_event_wait_list);
   
   CAMLlocal2(data, caml_event);
@@ -859,7 +859,7 @@ value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
   blocking_read = Val_int(caml_blocking_read);
   
   offset = 0;
-  array_val(Field(caml_host_mem, 0), &ptr, &size);
+  array_val(caml_genarray, &ptr, &size);
   num_events_in_wait_list = list_length(caml_event_wait_list);
   event_wait_list =
     num_events_in_wait_list == 0 ? NULL : cl_event_val(caml_event_wait_list);
@@ -874,10 +874,10 @@ value caml_enqueue_read_buffer(value caml_command_queue, value caml_buffer,
 }
 
 value caml_enqueue_write_buffer(value caml_command_queue, value caml_buffer,
-  value caml_blocking_write, value caml_host_mem, value caml_event_wait_list)
+  value caml_blocking_write, value caml_genarray, value caml_event_wait_list)
 {
-  CAMLparam5(caml_command_queue, caml_buffer, caml_blocking_write, caml_host_mem,
-    caml_event_wait_list);
+  CAMLparam5(caml_command_queue, caml_buffer, caml_blocking_write,
+    caml_genarray, caml_event_wait_list);
   
   CAMLlocal2(data, caml_event);
   cl_command_queue command_queue;
@@ -895,7 +895,7 @@ value caml_enqueue_write_buffer(value caml_command_queue, value caml_buffer,
   blocking_write = Val_int(caml_blocking_write);
   
   offset = 0;
-  array_val(Field(caml_host_mem, 0), &ptr, &size);
+  array_val(caml_genarray, &ptr, &size);
   num_events_in_wait_list = list_length(caml_event_wait_list);
   event_wait_list =
     num_events_in_wait_list == 0 ? NULL : cl_event_val(caml_event_wait_list);
