@@ -760,7 +760,7 @@ value caml_set_kernel_arg(value caml_kernel, value caml_arg_index,
       break;
     case 1:
       arg_size = sizeof(cl_mem);
-      ((int*) buf)[0] = Nativeint_val(data);
+      ((long*) buf)[0] = Nativeint_val(data);
       arg_value = buf;
       break;
     case 2:
