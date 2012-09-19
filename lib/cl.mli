@@ -119,9 +119,9 @@ module Device_info : sig
   
   val device_type                       : unit t
   val vendor_id                         : unit t
-  val max_compute_units                 : unit t
-  val max_work_item_dimensions          : unit t
-  val max_work_group_size               : unit t
+  val max_compute_units                 : int t
+  val max_work_item_dimensions          : int t
+  val max_work_group_size               : int t
   val max_work_item_sizes               : unit t
   val preferred_vector_width_char       : unit t
   val preferred_vector_width_short      : unit t
@@ -146,13 +146,13 @@ module Device_info : sig
   val min_data_type_align_size          : unit t
   val single_fp_config                  : unit t
   val global_mem_cache_type             : unit t
-  val global_mem_cacheline_size         : unit t
-  val global_mem_cache_size             : unit t
-  val global_mem_size                   : unit t
+  val global_mem_cacheline_size         : int t
+  val global_mem_cache_size             : int t
+  val global_mem_size                   : int t
   val max_constant_buffer_size          : unit t
   val max_constant_args                 : unit t
   val local_mem_type                    : unit t
-  val local_mem_size                    : unit t
+  val local_mem_size                    : int t
   val error_correction_support          : unit t
   val profiling_timer_resolution        : unit t
   val endian_little                     : unit t

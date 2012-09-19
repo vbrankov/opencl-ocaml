@@ -13,8 +13,22 @@ let () =
        Cl.Platform_info.EXTENSIONS];
     let devices = Cl.get_device_ids platform [Cl.Device_type.ALL] in
     let device = List.hd devices in
-    let name = Cl.get_device_info device Cl.Device_info.name in
-    Printf.printf "%s\n%!" name;
+    Printf.printf "global max compute units = %d\n%!"
+      (Cl.get_device_info device Cl.Device_info.max_compute_units);
+    Printf.printf "global max work item dimensions = %d\n%!"
+      (Cl.get_device_info device Cl.Device_info.max_work_item_dimensions);
+    Printf.printf "global max work group size = %d\n%!"
+      (Cl.get_device_info device Cl.Device_info.max_work_group_size);
+    Printf.printf "global mem cacheline size = %d\n%!"
+      (Cl.get_device_info device Cl.Device_info.global_mem_cacheline_size);
+    Printf.printf "global mem cache size = %d\n%!"
+      (Cl.get_device_info device Cl.Device_info.global_mem_cache_size);
+    Printf.printf "global mem size = %d\n%!"
+      (Cl.get_device_info device Cl.Device_info.global_mem_size);
+    Printf.printf "local mem size = %d\n%!"
+      (Cl.get_device_info device Cl.Device_info.local_mem_size);
+    Printf.printf "name = %s\n%!"
+      (Cl.get_device_info device Cl.Device_info.name);
     let pfn_notify errinfo _ _ =
       Printf.printf "create_context pfn_notify %s\n%!" errinfo
     in

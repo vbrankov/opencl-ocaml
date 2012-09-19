@@ -403,6 +403,19 @@ value caml_get_device_info(value caml_device, value caml_param_name)
   caml_acquire_runtime_system();
   switch (param_name)
   {
+    case CL_DEVICE_MAX_COMPUTE_UNITS:
+    case CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS:
+    case CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE:
+      caml_param_value = Int_val(*((cl_uint*) param_value));
+      break;
+    case CL_DEVICE_MAX_WORK_GROUP_SIZE:
+      caml_param_value = Int_val(*((size_t*) param_value));
+      break;
+    case CL_DEVICE_GLOBAL_MEM_CACHE_SIZE:
+    case CL_DEVICE_GLOBAL_MEM_SIZE:
+    case CL_DEVICE_LOCAL_MEM_SIZE:
+      caml_param_value = Int_val(*((cl_ulong*) param_value));
+      break;
     case CL_DEVICE_NAME:
       caml_param_value = caml_copy_string((char*) param_value);
       break;
