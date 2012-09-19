@@ -651,13 +651,16 @@ static int caml_ba_element_size[] =
   8 /*COMPLEX32*/, 16 /*COMPLEX64*/
 };
 
-void array_val(value caml_genarray, void **ptr, size_t *size)
+void array_val(value caml_genarray, void **ptr, size_t *size,
+  size_t *element_size)
 {
   struct caml_ba_array *array;
   int i;
   
   array = Bigarray_val(caml_genarray);
   *size = bigarray_element_size[array->flags & BIGARRAY_KIND_MASK];
+  if (element_size != NULL)
+    *element_size = *size;
   for (i = 0; i < array->num_dims; i++)
     *size *= array->dim[i];
   *ptr = array->data;
@@ -685,7 +688,7 @@ value caml_create_buffer(value caml_context, value caml_flags, value caml_src)
       host_ptr = NULL;
       break;
     case 1:
-      array_val(Field(caml_src, 0), &host_ptr, &size);
+      array_val(Field(caml_src, 0), &host_ptr, &size, NULL);
       break;
     default:
       assert(0);
@@ -849,7 +852,7 @@ value caml_enqueue_read_buffer_native(value caml_command_queue,
   cl_command_queue command_queue;
   cl_mem buffer;
   cl_bool blocking_read;
-  size_t offset, size;
+  size_t offset, size, element_size;
   void *ptr;
   cl_uint num_events_in_wait_list;
   cl_event *event_wait_list;
@@ -860,15 +863,15 @@ value caml_enqueue_read_buffer_native(value caml_command_queue,
   buffer = (cl_mem) Nativeint_val(caml_buffer);
   blocking_read = Val_int(caml_blocking_read);
   
+  array_val(caml_genarray, &ptr, &size, &element_size);
   if (Is_block(caml_offset_opt))
   {
-    offset = Int_val(Field(caml_offset_opt, 0));
+    offset = element_size * Int_val(Field(caml_offset_opt, 0));
   }
   else
   {
     offset = 0;
   }
-  array_val(caml_genarray, &ptr, &size);
   num_events_in_wait_list = list_length(caml_event_wait_list);
   event_wait_list =
     num_events_in_wait_list == 0 ? NULL : cl_event_val(caml_event_wait_list);
@@ -900,7 +903,7 @@ value caml_enqueue_write_buffer_native(value caml_command_queue,
   cl_command_queue command_queue;
   cl_mem buffer;
   cl_bool blocking_write;
-  size_t offset, size;
+  size_t offset, size, element_size;
   void *ptr;
   cl_uint num_events_in_wait_list;
   cl_event *event_wait_list;
@@ -911,15 +914,15 @@ value caml_enqueue_write_buffer_native(value caml_command_queue,
   buffer = (cl_mem) Nativeint_val(caml_buffer);
   blocking_write = Val_int(caml_blocking_write);
   
+  array_val(caml_genarray, &ptr, &size, &element_size);
   if (Is_block(caml_offset_opt))
   {
-    offset = Int_val(Field(caml_offset_opt, 0));
+    offset = element_size * Int_val(Field(caml_offset_opt, 0));
   }
   else
   {
     offset = 0;
   }
-  array_val(caml_genarray, &ptr, &size);
   num_events_in_wait_list = list_length(caml_event_wait_list);
   event_wait_list =
     num_events_in_wait_list == 0 ? NULL : cl_event_val(caml_event_wait_list);
