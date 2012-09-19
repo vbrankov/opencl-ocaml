@@ -7,6 +7,7 @@
 #include <caml/fail.h>
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
+#include <caml/threads.h>
 #include <CL/opencl.h>
 
 int list_length(value v)
@@ -265,10 +266,37 @@ void raise_cl_error(cl_int error)
   value* exception;
   if (error == CL_SUCCESS)
     return;
+  caml_acquire_runtime_system();
   exception = caml_named_value("Cl_error");
   if (exception == NULL)
     caml_failwith("Cl_error not registered");
   caml_raise_with_arg(*exception, val_cl_error(error));
+}
+
+void *caml_malloc(size_t n)
+{
+  void *p;
+  
+  p = malloc(n);
+  if (p == NULL)
+  {
+    caml_acquire_runtime_system();
+    caml_failwith("malloc error");
+  }
+  return p;
+}
+
+void *caml_calloc(size_t n, size_t s)
+{
+  void *p;
+  
+  p = calloc(n, s);
+  if (p == NULL)
+  {
+    caml_acquire_runtime_system();
+    caml_failwith("calloc error");
+  }
+  return p;
 }
 
 value caml_get_platform_ids(value unit)
@@ -280,14 +308,14 @@ value caml_get_platform_ids(value unit)
   cl_platform_id* platforms;
   cl_int errcode;
   
+  caml_release_runtime_system();
   raise_cl_error(clGetPlatformIDs(0, NULL, &num_platforms));
-  platforms = calloc(num_platforms, sizeof(cl_platform_id));
-  if (platforms == NULL)
-    caml_failwith("calloc error");
+  platforms = caml_calloc(num_platforms, sizeof(cl_platform_id));
   errcode = clGetPlatformIDs(num_platforms, platforms, NULL);
   if (errcode != CL_SUCCESS)
     free(platforms);
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   caml_platforms = val_nativeint_list((long*) platforms, num_platforms);
   free(platforms);
   
@@ -307,16 +335,16 @@ value caml_get_platform_info(value caml_platform, value caml_param_name)
   
   platform = (cl_platform_id) Nativeint_val(caml_platform);
   param_name = cl_platform_info_val(caml_param_name);
+  caml_release_runtime_system();
   raise_cl_error(
     clGetPlatformInfo(platform, param_name, 0, NULL, &param_value_size));
-  param_value = calloc(param_value_size, sizeof(char));
-  if (param_value == NULL)
-    caml_failwith("calloc error");
-  errcode = clGetPlatformInfo(platform, param_name, param_value_size, param_value,
-    NULL);
+  param_value = caml_calloc(param_value_size, sizeof(char));
+  errcode = clGetPlatformInfo(platform, param_name, param_value_size,
+    param_value, NULL);
   if (errcode != CL_SUCCESS)
     free(param_value);
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   caml_param_value = caml_copy_string(param_value);
   free(param_value);
   
@@ -336,14 +364,14 @@ value caml_get_device_ids(value caml_platform, value caml_device_type)
 
   platform = (cl_platform_id) Nativeint_val(caml_platform);
   device_type = cl_device_type_val(caml_device_type);
+  caml_release_runtime_system();
   raise_cl_error(clGetDeviceIDs(platform, device_type, 0, NULL, &num_devices));
-  devices = calloc(num_devices, sizeof(cl_device_id));
-  if (devices == NULL)
-    caml_failwith("calloc error");
+  devices = caml_calloc(num_devices, sizeof(cl_device_id));
   errcode = clGetDeviceIDs(platform, device_type, num_devices, devices, NULL);
   if (errcode != CL_SUCCESS)
     free(devices);
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   caml_devices = val_nativeint_list((long*) devices, num_devices);
   free(devices);
   
@@ -363,16 +391,16 @@ value caml_get_device_info(value caml_device, value caml_param_name)
   
   device = (cl_device_id) Nativeint_val(caml_device);
   param_name = Int_val(caml_param_name);
+  caml_release_runtime_system();
   raise_cl_error(
     clGetDeviceInfo(device, param_name, 0, NULL, &param_value_size));
-  param_value = malloc(param_value_size);
-  if (param_value == NULL)
-    caml_failwith("malloc error");
+  param_value = caml_malloc(param_value_size);
   errcode =
     clGetDeviceInfo(device, param_name, param_value_size, param_value, NULL);
   if (errcode != CL_SUCCESS)
     free(param_value);
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   switch (param_name)
   {
     case CL_DEVICE_NAME:
@@ -425,6 +453,7 @@ void CL_CALLBACK pfn_notify_create_context(
   size_t cb,
   void *user_data)
 {
+  caml_acquire_runtime_system();
   CAMLlocal4(caml_pfn_notify, caml_errinfo, caml_private_info, caml_cb);
   
   caml_pfn_notify = Field(*caml_pfn_notifies_create_context, (long) user_data);
@@ -432,6 +461,7 @@ void CL_CALLBACK pfn_notify_create_context(
   caml_private_info = caml_copy_nativeint((long) private_info);
   caml_cb = caml_copy_nativeint(cb);
   caml_callback3(caml_pfn_notify, caml_errinfo, caml_private_info, caml_cb);
+  caml_release_runtime_system();
 }
 
 void array_add(value **array, value *element)
@@ -470,6 +500,8 @@ value caml_create_context(value caml_properties, value caml_devices,
   properties = cl_context_properties_val(caml_properties);
   num_devices = list_length(caml_devices);
   devices = calloc(num_devices, sizeof(cl_device_id));
+  if (devices == NULL)
+    caml_failwith("calloc error");
   for (i = 0; Is_block(caml_devices); i++)
   {
     devices[i] = (cl_device_id) Nativeint_val(Field(caml_devices, 0));
@@ -478,12 +510,13 @@ value caml_create_context(value caml_properties, value caml_devices,
   // Store caml_pfn_notify so that it doesn't get garbage collected
   array_add(&caml_pfn_notifies_create_context, &caml_pfn_notify);
   user_data = (void*) Wosize_val(*caml_pfn_notifies_create_context) - 1;
-  context = clCreateContext(
-    properties, num_devices, devices, &pfn_notify_create_context, user_data,
-    &errcode);
+  caml_release_runtime_system();
+  context = clCreateContext(properties, num_devices, devices,
+    &pfn_notify_create_context, user_data, &errcode);
   free(properties);
   free(devices);
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   caml_context = caml_copy_nativeint((long) context);
   
   CAMLreturn(caml_context);
@@ -504,8 +537,10 @@ value caml_create_command_queue(value caml_context, value caml_device,
   context = (cl_context) Nativeint_val(caml_context);
   device = (cl_device_id) Nativeint_val(caml_device);
   properties = cl_command_queue_properties_val(caml_properties);
+  caml_release_runtime_system();
   command_queue = clCreateCommandQueue(context, device, properties, &errcode);
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   caml_command_queue = caml_copy_nativeint((long) command_queue);
   
   CAMLreturn(caml_command_queue);
@@ -526,10 +561,12 @@ value caml_create_program_with_source(value caml_context, value caml_strings)
   context = (cl_context) Nativeint_val(caml_context);
   count = list_length(caml_strings);
   strings = char_array_array_val(caml_strings);
+  caml_release_runtime_system();
   program = clCreateProgramWithSource(context, count, strings, NULL, &errcode);
   for (i = 0; i < count; i++)
     free(strings + i);
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   caml_program = caml_copy_nativeint((long) program);
   
   CAMLreturn(caml_program);
@@ -539,6 +576,7 @@ static value *caml_pfn_notifies_build_program = NULL;
 
 void CL_CALLBACK pfn_notify_build_program(cl_program program, void *user_data)
 {
+  caml_acquire_runtime_system();
   CAMLlocal2(caml_pfn_notify, caml_program);
   
   caml_pfn_notify = (value) user_data;
@@ -546,6 +584,7 @@ void CL_CALLBACK pfn_notify_build_program(cl_program program, void *user_data)
   // XXX If we're sure that the callback won't be called any more, delete it to
   // prevent leaks
   caml_callback(caml_pfn_notify, caml_program);
+  caml_release_runtime_system();
 }
 
 value caml_build_program(value caml_program, value caml_devices,
@@ -567,10 +606,12 @@ value caml_build_program(value caml_program, value caml_devices,
   // Store caml_pfn_notify so that it doesn't get garbage collected
   array_add(&caml_pfn_notifies_build_program, &caml_pfn_notify);
   user_data = (void*) caml_pfn_notify;
+  caml_release_runtime_system();
   errcode = clBuildProgram(program, num_devices, device_list, options,
     &pfn_notify_build_program, user_data);
   free(device_list);
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   
   CAMLreturn(Val_unit);
 }
@@ -591,16 +632,16 @@ value caml_get_program_build_info(value caml_program, value caml_device,
   program = (cl_program) Nativeint_val(caml_program);
   device = (cl_device_id) Nativeint_val(caml_device);
   param_name = (cl_program_build_info) Int_val(caml_param_name);
+  caml_release_runtime_system();
   raise_cl_error(clGetProgramBuildInfo(program, device, param_name, 0, NULL,
     &param_value_size));
-  param_value = malloc(param_value_size);
-  if (param_value == NULL)
-    caml_failwith("malloc error");
+  param_value = caml_malloc(param_value_size);
   errcode = clGetProgramBuildInfo(program, device, param_name, param_value_size,
     param_value, NULL);
   if (errcode != CL_SUCCESS)
     free(param_value);
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   switch (param_name)
   {
     case CL_PROGRAM_BUILD_STATUS:
@@ -632,8 +673,10 @@ value caml_create_kernel(value caml_program, value caml_kernel_name)
   
   program = (cl_program) Nativeint_val(caml_program);
   kernel_name = String_val(caml_kernel_name);
+  caml_release_runtime_system();
   kernel = clCreateKernel(program, kernel_name, &errcode);
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   caml_kernel = caml_copy_nativeint((long) kernel);
   
   CAMLreturn(caml_kernel);
@@ -693,8 +736,10 @@ value caml_create_buffer(value caml_context, value caml_flags, value caml_src)
     default:
       assert(0);
   }
+  caml_release_runtime_system();
   mem = clCreateBuffer(context, flags, size, host_ptr, &errcode);
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   caml_mem = caml_copy_nativeint((long) mem);
   
   CAMLreturn(caml_mem);
@@ -775,7 +820,9 @@ value caml_set_kernel_arg(value caml_kernel, value caml_arg_index,
     default:
       caml_failwith("unrecognized Arg_value");
   }
+  caml_release_runtime_system();
   raise_cl_error(clSetKernelArg(kernel, arg_index, arg_size, arg_value));
+  caml_acquire_runtime_system();
   
   CAMLreturn(Val_unit);
 }
@@ -818,6 +865,7 @@ value caml_enqueue_nd_range_kernel_native(
   event_wait_list =
     num_events_in_wait_list == 0 ? NULL : cl_event_val(caml_event_wait_list);
 
+  caml_release_runtime_system();
   errcode = clEnqueueNDRangeKernel(command_queue, kernel, work_dim,
     global_work_offset, global_work_size, local_work_size,
     num_events_in_wait_list, event_wait_list, &event);
@@ -829,6 +877,7 @@ value caml_enqueue_nd_range_kernel_native(
     free(event_wait_list);
   }
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   caml_event = caml_copy_nativeint((long) event);
   
   CAMLreturn(caml_event);
@@ -875,11 +924,13 @@ value caml_enqueue_read_buffer_native(value caml_command_queue,
   num_events_in_wait_list = list_length(caml_event_wait_list);
   event_wait_list =
     num_events_in_wait_list == 0 ? NULL : cl_event_val(caml_event_wait_list);
+  caml_release_runtime_system();
   errcode = clEnqueueReadBuffer(command_queue, buffer, blocking_read, offset,
     size, ptr, num_events_in_wait_list, event_wait_list, &event);
   if (errcode != CL_SUCCESS)
     free(event_wait_list);
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   caml_event = caml_copy_nativeint((long) event);
   
   CAMLreturn(caml_event);
@@ -926,11 +977,13 @@ value caml_enqueue_write_buffer_native(value caml_command_queue,
   num_events_in_wait_list = list_length(caml_event_wait_list);
   event_wait_list =
     num_events_in_wait_list == 0 ? NULL : cl_event_val(caml_event_wait_list);
+  caml_release_runtime_system();
   errcode = clEnqueueWriteBuffer(command_queue, buffer, blocking_write, offset,
     size, ptr, num_events_in_wait_list, event_wait_list, &event);
   if (errcode != CL_SUCCESS)
     free(event_wait_list);
   raise_cl_error(errcode);
+  caml_acquire_runtime_system();
   caml_event = caml_copy_nativeint((long) event);
   
   CAMLreturn(caml_event);
@@ -949,7 +1002,9 @@ value caml_release_kernel(value caml_kernel)
   cl_kernel kernel;
   
   kernel = (cl_kernel) Nativeint_val(caml_kernel);
+  caml_release_runtime_system();
   raise_cl_error(clReleaseKernel(kernel));
+  caml_acquire_runtime_system();
   
   CAMLreturn(Val_unit);
 }
@@ -961,7 +1016,9 @@ value caml_release_command_queue(value caml_command_queue)
   cl_command_queue command_queue;
   
   command_queue = (cl_command_queue) Nativeint_val(caml_command_queue);
+  caml_release_runtime_system();
   raise_cl_error(clReleaseCommandQueue(command_queue));
+  caml_acquire_runtime_system();
   
   CAMLreturn(Val_unit);
 }
@@ -973,7 +1030,9 @@ value caml_release_context(value caml_context)
   cl_context context;
   
   context = (cl_context) Nativeint_val(caml_context);
+  caml_release_runtime_system();
   raise_cl_error(clReleaseContext(context));
+  caml_acquire_runtime_system();
   
   CAMLreturn(Val_unit);
 }
@@ -985,7 +1044,9 @@ value caml_release_mem_object(value caml_memobj)
   cl_mem memobj;
   
   memobj = (cl_mem) Nativeint_val(caml_memobj);
+  caml_release_runtime_system();
   raise_cl_error(clReleaseMemObject(memobj));
+  caml_acquire_runtime_system();
   
   CAMLreturn(Val_unit);
 }
@@ -997,7 +1058,9 @@ value caml_release_program(value caml_program)
   cl_program program;
   
   program = (cl_program) Nativeint_val(caml_program);
+  caml_release_runtime_system();
   raise_cl_error(clReleaseProgram(program));
+  caml_acquire_runtime_system();
   
   CAMLreturn(Val_unit);
 }
@@ -1011,7 +1074,9 @@ value caml_wait_for_events(value caml_event_list)
   
   num_events = list_length(caml_event_list);
   event_list = num_events == 0 ? NULL : cl_event_val(caml_event_list);
+  caml_release_runtime_system();
   raise_cl_error(clWaitForEvents(num_events, event_list));
+  caml_acquire_runtime_system();
   
   CAMLreturn(Val_unit);
 }
