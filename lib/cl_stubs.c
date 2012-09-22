@@ -522,7 +522,7 @@ value caml_create_context(value caml_properties, value caml_devices,
   }
   // Store caml_pfn_notify so that it doesn't get garbage collected
   array_add(&caml_pfn_notifies_create_context, &caml_pfn_notify);
-  user_data = (void*) Wosize_val(*caml_pfn_notifies_create_context) - 1;
+  user_data = (void*) (Wosize_val(*caml_pfn_notifies_create_context) - 1);
   caml_release_runtime_system();
   context = clCreateContext(properties, num_devices, devices,
     &pfn_notify_create_context, user_data, &errcode);
@@ -565,11 +565,10 @@ value caml_create_program_with_source(value caml_context, value caml_strings)
   
   CAMLlocal1(caml_program);
   cl_context context;
-  cl_uint count;
+  cl_uint count, i;
   const char** strings;
   cl_int errcode;
   cl_program program;
-  int i;
   
   context = (cl_context) Nativeint_val(caml_context);
   count = list_length(caml_strings);
@@ -713,8 +712,8 @@ void array_val(value caml_genarray, void **ptr, size_t *size,
   struct caml_ba_array *array;
   int i;
   
-  array = Bigarray_val(caml_genarray);
-  *size = bigarray_element_size[array->flags & BIGARRAY_KIND_MASK];
+  array = Caml_ba_array_val(caml_genarray);
+  *size = caml_ba_element_size[array->flags & CAML_BA_KIND_MASK];
   if (element_size != NULL)
     *element_size = *size;
   for (i = 0; i < array->num_dims; i++)
@@ -739,7 +738,7 @@ value caml_create_buffer(value caml_context, value caml_flags, value caml_src)
   switch (Tag_val(caml_src))
   {
     case 0:
-      size = bigarray_element_size[Int_val(Field(caml_src, 0))] *
+      size = caml_ba_element_size[Int_val(Field(caml_src, 0))] *
              Int_val(Field(caml_src, 1));
       host_ptr = NULL;
       break;
@@ -769,10 +768,10 @@ void set_bigarray_value(void* ptr, int offset, int kind, value val)
     ((double *) ptr)[offset] = Double_val(val); break;
   case CAML_BA_SINT8:
   case CAML_BA_UINT8:
-    ((int8 *) ptr)[offset] = Int_val(val); break;
+    ((caml_ba_int8 *) ptr)[offset] = Int_val(val); break;
   case CAML_BA_SINT16:
   case CAML_BA_UINT16:
-    ((int16 *) ptr)[offset] = Int_val(val); break;
+    ((caml_ba_int16 *) ptr)[offset] = Int_val(val); break;
   case CAML_BA_INT32:
     ((int32 *) ptr)[offset] = Int32_val(val); break;
   case CAML_BA_INT64:
@@ -815,7 +814,7 @@ value caml_set_kernel_arg(value caml_kernel, value caml_arg_index,
     case 0:
       kind = Int_val(data);
       data = Field(caml_arg_value, 1);
-      arg_size = bigarray_element_size[kind];
+      arg_size = caml_ba_element_size[kind];
       set_bigarray_value(buf, 0, kind, data);
       arg_value = buf;
       break;
@@ -827,7 +826,7 @@ value caml_set_kernel_arg(value caml_kernel, value caml_arg_index,
     case 2:
       kind = Int_val(data);
       data = Field(caml_arg_value, 1);
-      arg_size = bigarray_element_size[kind] * Int_val(data);
+      arg_size = caml_ba_element_size[kind] * Int_val(data);
       arg_value = NULL;
       break;
     default:
@@ -898,6 +897,7 @@ value caml_enqueue_nd_range_kernel_native(
 
 value caml_enqueue_nd_range_kernel_bytecode(value *argv, int argn)
 {
+  assert(argn == 6);
   return caml_enqueue_nd_range_kernel_native(
     argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
 }
@@ -951,6 +951,7 @@ value caml_enqueue_read_buffer_native(value caml_command_queue,
 
 value caml_enqueue_read_buffer_bytecode(value *argv, int argn)
 {
+  assert(argn == 6);
   return caml_enqueue_read_buffer_native(
     argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
 }
@@ -1004,6 +1005,7 @@ value caml_enqueue_write_buffer_native(value caml_command_queue,
 
 value caml_enqueue_write_buffer_bytecode(value *argv, int argn)
 {
+  assert(argn == 6);
   return caml_enqueue_write_buffer_native(
     argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
 }

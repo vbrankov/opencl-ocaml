@@ -1,5 +1,5 @@
 # Modify these if OpenCL is not installed in a standard folder
-OPENCL_LIB_DIR=.
+OPENCL_LIB_DIR=/cygdrive/c/Program Files (x86)/AMD APP/lib/x86
 
 LIB_SRC = $(wildcard lib/*.mli)
 EXAMPLES_SRC = $(wildcard examples/*.ml)
@@ -21,7 +21,8 @@ lib/%.cmi: lib/%.mli
 	@ocamlopt $^
 	
 %.o: %.c
-	@ocamlopt -ccopt "-o $@ -I." -c $^
+	@ocamlopt -ccopt "-o $@ -I. -Wall -pedantic -Wextra -Wunused -Werror \
+		-Wno-long-long -std=c99 -DCAML_NAME_SPACE" -c $^
 
 doc:
 	@mkdir -p doc
