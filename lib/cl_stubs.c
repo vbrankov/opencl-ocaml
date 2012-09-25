@@ -565,7 +565,7 @@ value caml_create_program_with_source(value caml_context, value caml_strings)
   
   CAMLlocal1(caml_program);
   cl_context context;
-  cl_uint count, i;
+  cl_uint count;
   const char** strings;
   cl_int errcode;
   cl_program program;
@@ -575,8 +575,7 @@ value caml_create_program_with_source(value caml_context, value caml_strings)
   strings = char_array_array_val(caml_strings);
   caml_release_runtime_system();
   program = clCreateProgramWithSource(context, count, strings, NULL, &errcode);
-  for (i = 0; i < count; i++)
-    free(strings + i);
+  free(strings);
   raise_cl_error(errcode);
   caml_acquire_runtime_system();
   caml_program = caml_copy_nativeint((long) program);
