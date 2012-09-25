@@ -177,7 +177,7 @@ module Device_info : sig
   val native_vector_width_float         : unit t
   val native_vector_width_double        : unit t
   val native_vector_width_half          : unit t
-  val opencl_c_version                  : unit t
+  val opencl_c_version                  : string t
   val linker_available                  : unit t
   val built_in_kernels                  : unit t
   val image_max_buffer_size             : unit t

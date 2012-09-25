@@ -29,6 +29,8 @@ let () =
       (Cl.get_device_info device Cl.Device_info.local_mem_size);
     Printf.printf "name = %s\n%!"
       (Cl.get_device_info device Cl.Device_info.name);
+    Printf.printf "OpenCL C version = %s\n%!"
+      (Cl.get_device_info device Cl.Device_info.opencl_c_version);
     let pfn_notify errinfo _ _ =
       Printf.printf "create_context pfn_notify %s\n%!" errinfo
     in

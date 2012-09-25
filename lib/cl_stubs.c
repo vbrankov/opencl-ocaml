@@ -417,6 +417,7 @@ value caml_get_device_info(value caml_device, value caml_param_name)
       caml_param_value = Int_val(*((cl_ulong*) param_value));
       break;
     case CL_DEVICE_NAME:
+    case CL_DEVICE_OPENCL_C_VERSION:
       caml_param_value = caml_copy_string((char*) param_value);
       break;
     default: caml_param_value = Val_unit;
