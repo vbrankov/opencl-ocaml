@@ -246,6 +246,14 @@ module Program_build_info : sig
   val binary_type   : Program_binary_type.t t
 end
 
+module Command_execution_status = struct
+  type t =
+  | CL_COMPLETE
+  | CL_RUNNING
+  | CL_SUBMITTED
+  | CL_QUEUED
+end
+
 module Arg_value : sig
   (* XXX Not all possible arguments are implemented *)
   type ('a, 'b) t =

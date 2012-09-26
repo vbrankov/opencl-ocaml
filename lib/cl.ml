@@ -312,6 +312,14 @@ module Program_build_info = struct
   let binary_type                       : Program_binary_type.t t = 0x1184
 end
 
+module Command_execution_status = struct
+  type t =
+  | CL_COMPLETE
+  | CL_RUNNING
+  | CL_SUBMITTED
+  | CL_QUEUED
+end
+
 module Arg_value = struct
   (* XXX Not all possible arguments are implemented *)
   type ('a, 'b) t =
