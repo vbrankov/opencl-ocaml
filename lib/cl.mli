@@ -246,7 +246,7 @@ module Program_build_info : sig
   val binary_type   : Program_binary_type.t t
 end
 
-module Command_execution_status = struct
+module Command_execution_status : sig
   type t =
   | CL_COMPLETE
   | CL_RUNNING
