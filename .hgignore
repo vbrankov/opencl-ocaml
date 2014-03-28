@@ -1,2 +1,2 @@
 syntax:glob
-*.{a,cmi,cmo,cmx,cmxa,exe,o,stackdump,tmp,tmp.dll}
+*.{a,cmi,cmo,cmx,cmxa,exe,o,so,stackdump,swp,tmp,tmp.dll}

@@ -1,0 +1,4 @@
+cl_stubs.o: cl_stubs.c
+cl.cmi :
+cl.cmo : cl.cmi
+cl.cmx : cl.cmi
