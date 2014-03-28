@@ -1,16 +1,8 @@
-OpenCL-OCaml is OCaml binding for OpenCL.  It closely follows the OpenCL specification.
-It currently implements the functionality needed for performing computations.  Other calls
-can be implemented when they're needed.
+This is OCaml binding for OpenCL.  It closely follows the OpenCL specification.
+It currently implements the functionality needed for performing computations.
+Other calls can be implemented when as needed.
 
-Building
-------------------
-To build the library do:
+To build it do:
 
+    ./configure
     make
-
-If OpenCL library cannot be found modify Makefile's OPENCL_LIB_DIR.
-
-To build examples and documentation do:
-
-    make examples
-    make doc
