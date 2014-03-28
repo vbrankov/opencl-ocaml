@@ -1,6 +1,6 @@
 This is OCaml binding for OpenCL.  It closely follows the OpenCL specification.
 It currently implements the functionality needed for performing computations.
-Other calls can be implemented when as needed.
+Other calls can be implemented as needed.
 
 To build it do:
 
