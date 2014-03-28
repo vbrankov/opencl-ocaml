@@ -1,2 +1,3 @@
 syntax:glob
 *.{a,cmi,cmo,cmx,cmxa,exe,o,so,stackdump,swp,tmp,tmp.dll}
+Makefile.config

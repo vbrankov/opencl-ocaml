@@ -1,0 +1,39 @@
+#!/bin/bash
+
+if [[ -d /opt/AMDAPP ]]
+then
+  OPENCL_INCLUDE_DIR=/opt/AMDAPP/include
+  OPENCL_LIB_DIR=/opt/AMDAPP/lib/x86_64
+fi
+
+while : ; do
+  case "$1" in
+    "") break;;
+    -opencl-include-dir)
+        OPENCL_INCLUDE_DIR=$2; shift;;
+    -opencl-lib-dir)
+        OPENCL_LIB_DIR=$2; shift;;
+    *)
+        echo "Unknown option \"$1\"." > /dev/stderr
+        exit 2
+  esac
+  shift
+done
+
+if [[ $OPENCL_INCLUDE_DIR = "" ]]
+then
+  echo "Cannot detect OpenCL include dir, please provide it with -opencl-include-dir"
+  exit 1
+fi
+
+if [[ $OPENCL_LIB_DIR = "" ]]
+then
+  echo "Cannot detect OpenCL lib dir, please provide it with -opencl-lib-dir"
+  exit 1
+fi
+
+rm -f Makefile.config
+touch Makefile.config
+
+echo "OPENCL_INCLUDE_DIR=${OPENCL_INCLUDE_DIR}" >> Makefile.config
+echo "OPENCL_LIB_DIR=${OPENCL_LIB_DIR}" >> Makefile.config
