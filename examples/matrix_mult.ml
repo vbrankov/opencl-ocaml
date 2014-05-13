@@ -67,11 +67,12 @@ let () =
     Cl.set_kernel_arg kernel 5 (Cl.Arg_value.MEM buffer_a);
     Cl.set_kernel_arg kernel 6 (Cl.Arg_value.MEM buffer_b);
     
-    let _ = Cl.enqueue_nd_range_kernel cmd_queue kernel None [16; 16] None []
-    in
-    let _ =
+    let event = Cl.enqueue_nd_range_kernel cmd_queue kernel None [16; 16] None [] in
+    Cl.release_event event;
+    let event =
       Cl.enqueue_read_buffer cmd_queue buffer_c true (genarray_of_array2 c) []
     in
+    Cl.release_event event;
     
     for i = 0 to hB - 1 do
       for j = 0 to wB - 1 do

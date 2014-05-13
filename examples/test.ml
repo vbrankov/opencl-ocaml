@@ -86,15 +86,18 @@ let () =
     Cl.set_kernel_arg vector_add_k 2 (Cl.Arg_value.MEM res_d);
     Cl.set_kernel_arg vector_add_k 3
       (Cl.Arg_value.SCALAR (int32, Int32.of_int size));
-    let _ =
+    let event =
       Cl.enqueue_write_buffer queue src_a_d true (genarray_of_array1 src_a_h) []
     in
-    let _ =
+    Cl.release_event event;
+    let event =
       Cl.enqueue_nd_range_kernel queue vector_add_k None [size] (Some [16]) []
     in
-    let _ =
+    Cl.release_event event;
+    let event =
       Cl.enqueue_read_buffer queue res_d true (genarray_of_array1 res_h) []
     in
+    Cl.release_event event;
     for i = 0 to size - 1 do
       Printf.printf "%.2f " res_h.{i}
     done;

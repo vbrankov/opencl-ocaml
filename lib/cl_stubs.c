@@ -1080,6 +1080,20 @@ value caml_release_program(value caml_program)
   CAMLreturn(Val_unit);
 }
 
+value caml_release_event(value caml_event)
+{
+  CAMLparam1(caml_event);
+  
+  cl_event event;
+  
+  event = (cl_event) Nativeint_val(caml_event);
+  caml_release_runtime_system();
+  raise_cl_error(clReleaseEvent(event));
+  caml_acquire_runtime_system();
+  
+  CAMLreturn(Val_unit);
+}
+
 value caml_wait_for_events(value caml_event_list)
 {
   CAMLparam1(caml_event_list);

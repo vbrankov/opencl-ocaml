@@ -319,5 +319,7 @@ val release_context : Context.t -> unit
 val release_mem_object : (_, _) Mem.t -> unit
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clReleaseProgram.html } Kronos Doc} *)
 val release_program : Program.t -> unit
+(** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clReleaseEvent.html } Kronos Doc} *)
+val release_event : Event.t -> unit
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clWaitForEvents.html } Kronos Doc} *)
 val wait_for_events : Event.t list -> unit
