@@ -459,54 +459,14 @@ cl_context_properties* cl_context_properties_val(value v)
   return properties;
 }
 
-static value *caml_pfn_notifies_create_context = NULL;
-
-void CL_CALLBACK pfn_notify_create_context(
-  const char *errinfo,
-  const void *private_info,
-  size_t cb,
-  void *user_data)
+value caml_create_context(value caml_properties, value caml_devices)
 {
-  caml_acquire_runtime_system();
-  CAMLlocal4(caml_pfn_notify, caml_errinfo, caml_private_info, caml_cb);
-  
-  caml_pfn_notify = Field(*caml_pfn_notifies_create_context, (long) user_data);
-  caml_errinfo = caml_copy_string(errinfo);
-  caml_private_info = caml_copy_nativeint((long) private_info);
-  caml_cb = caml_copy_nativeint(cb);
-  caml_callback3(caml_pfn_notify, caml_errinfo, caml_private_info, caml_cb);
-  caml_release_runtime_system();
-}
-
-void array_add(value **array, value *element)
-{
-  CAMLlocal1(new_array);
-  int i, length;
-  
-  length = *array != NULL ? Wosize_val(*array) : 0;
-  new_array = caml_alloc_tuple(length + 1);
-  caml_register_generational_global_root(&new_array);
-  for (i = 0; i < length; i++)
-    Store_field(new_array, i, Field(**array, i));
-  Store_field(new_array, length, *element);
-  if (*array != NULL)
-  {
-    caml_remove_generational_global_root(*array);
-    free(*array);
-  }
-  *array = &new_array;
-}
-
-value caml_create_context(value caml_properties, value caml_devices,
-  value caml_pfn_notify, value caml_user_data)
-{
-  CAMLparam4(caml_properties, caml_devices, caml_pfn_notify, caml_user_data);
+  CAMLparam2(caml_properties, caml_devices);
   
   CAMLlocal1(caml_context);
   cl_context_properties* properties;
   cl_uint num_devices;
   cl_device_id* devices;
-  void* user_data;
   cl_int errcode;
   int i;
   cl_context context;
@@ -521,12 +481,8 @@ value caml_create_context(value caml_properties, value caml_devices,
     devices[i] = (cl_device_id) Nativeint_val(Field(caml_devices, 0));
     caml_devices = Field(caml_devices, 1);
   }
-  // Store caml_pfn_notify so that it doesn't get garbage collected
-  array_add(&caml_pfn_notifies_create_context, &caml_pfn_notify);
-  user_data = (void*) (Wosize_val(*caml_pfn_notifies_create_context) - 1);
   caml_release_runtime_system();
-  context = clCreateContext(properties, num_devices, devices,
-    &pfn_notify_create_context, user_data, &errcode);
+  context = clCreateContext(properties, num_devices, devices, NULL, NULL, &errcode);
   free(properties);
   free(devices);
   raise_cl_error(errcode);
@@ -584,43 +540,22 @@ value caml_create_program_with_source(value caml_context, value caml_strings)
   CAMLreturn(caml_program);
 }
 
-static value *caml_pfn_notifies_build_program = NULL;
-
-void CL_CALLBACK pfn_notify_build_program(cl_program program, void *user_data)
+value caml_build_program(value caml_program, value caml_devices, value caml_options)
 {
-  caml_acquire_runtime_system();
-  CAMLlocal2(caml_pfn_notify, caml_program);
-  
-  caml_pfn_notify = (value) user_data;
-  caml_program = caml_copy_nativeint((long) program);
-  // XXX If we're sure that the callback won't be called any more, delete it to
-  // prevent leaks
-  caml_callback(caml_pfn_notify, caml_program);
-  caml_release_runtime_system();
-}
-
-value caml_build_program(value caml_program, value caml_devices,
-  value caml_options, value caml_pfn_notify)
-{
-  CAMLparam3(caml_program, caml_devices, caml_pfn_notify);
+  CAMLparam2(caml_program, caml_devices);
   
   cl_program program;
   cl_uint num_devices;
   cl_device_id *device_list;
   const char *options;
-  void *user_data;
   cl_int errcode;
   
   program = (cl_program) Nativeint_val(caml_program);
   num_devices = list_length(caml_devices);
   device_list = cl_device_id_val(caml_devices);
   options = String_val(caml_options);
-  // Store caml_pfn_notify so that it doesn't get garbage collected
-  array_add(&caml_pfn_notifies_build_program, &caml_pfn_notify);
-  user_data = (void*) caml_pfn_notify;
   caml_release_runtime_system();
-  errcode = clBuildProgram(program, num_devices, device_list, options,
-    &pfn_notify_build_program, user_data);
+  errcode = clBuildProgram(program, num_devices, device_list, options, NULL, NULL);
   free(device_list);
   raise_cl_error(errcode);
   caml_acquire_runtime_system();

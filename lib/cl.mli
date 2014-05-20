@@ -279,16 +279,14 @@ val get_device_ids : Platform_id.t -> Device_type.t list -> Device_id.t list
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetDeviceInfo.html } Kronos Doc} *)
 val get_device_info : Device_id.t -> 'a Device_info.t -> 'a
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clCreateContext.html } Kronos Doc} *)
-val create_context : Context_properties.t list -> Device_id.t list
-  -> (string -> int64 -> int64 -> unit) -> Context.t
+val create_context : Context_properties.t list -> Device_id.t list -> Context.t
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clCreateCommandQueue.html } Kronos Doc} *)
 val create_command_queue : Context.t -> Device_id.t
   -> Command_queue_properties.t list -> Command_queue.t
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clCreateProgramWithSource.html } Kronos Doc} *)
 val create_program_with_source : Context.t -> string list -> Program.t
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clBuildProgram.html } Kronos Doc} *)
-val build_program : Program.t -> Device_id.t list -> string
-  -> (Program.t -> unit) -> unit
+val build_program : Program.t -> Device_id.t list -> string -> unit
 (** {{: http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetProgramBuildInfo.html } Kronos Doc} *)
 val get_program_build_info : Program.t -> Device_id.t -> 'a Program_build_info.t
   -> 'a

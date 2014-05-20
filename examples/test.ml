@@ -32,10 +32,7 @@ let () =
       (Cl.get_device_info device Cl.Device_info.name);
     Printf.printf "OpenCL C version = %s\n%!"
       (Cl.get_device_info device Cl.Device_info.opencl_c_version);
-    let pfn_notify errinfo _ _ =
-      Printf.printf "create_context pfn_notify %s\n%!" errinfo
-    in
-    let context = Cl.create_context [] [device] pfn_notify in
+    let context = Cl.create_context [] [device] in
     let queue = Cl.create_command_queue context device [] in
     let program = Cl.create_program_with_source context ["
       __kernel void vector_add_gpu (
@@ -50,8 +47,7 @@ let () =
           res[idx] = src_a[idx] + src_b[idx];
       }"]
     in
-    let pfn_notify _ = Printf.printf "build_program pfn_notify\n%!" in
-    Cl.build_program program [device] "" pfn_notify;
+    Cl.build_program program [device] "";
     Printf.printf "built\n%!";
     let build_log = Cl.get_program_build_info program device
       Cl.Program_build_info.build_log

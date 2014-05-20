@@ -345,15 +345,15 @@ external get_device_ids : Platform_id.t -> Device_type.t list
   -> Device_id.t list = "caml_get_device_ids"
 external get_device_info : Device_id.t -> 'a Device_info.t -> 'a
   = "caml_get_device_info"
-external create_context : Context_properties.t list -> Device_id.t list
-  -> (string -> int64 -> int64 -> unit) -> Context.t = "caml_create_context"
+external create_context : Context_properties.t list -> Device_id.t list -> Context.t
+  = "caml_create_context"
 external create_command_queue : Context.t -> Device_id.t
   -> Command_queue_properties.t list -> Command_queue.t
   = "caml_create_command_queue"
 external create_program_with_source : Context.t -> string list -> Program.t
   = "caml_create_program_with_source"
-external build_program : Program.t -> Device_id.t list -> string
-  -> (Program.t -> unit) -> unit = "caml_build_program"
+external build_program : Program.t -> Device_id.t list -> string -> unit
+  = "caml_build_program"
 external get_program_build_info : Program.t -> Device_id.t
   -> 'a Program_build_info.t -> 'a = "caml_get_program_build_info"
 external create_kernel : Program.t -> string -> Kernel.t = "caml_create_kernel"
