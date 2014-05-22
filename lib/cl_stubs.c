@@ -197,7 +197,7 @@ cl_device_id* cl_device_id_val(value v)
   for (i = 0; Is_block(v); i++)
   {
     assert(Tag_val(v) == 0);
-    a[i] = (cl_device_id) Nativeint_val(Field(v, 0));
+    a[i] = (cl_device_id) Field(v, 0);
     v = Field(v, 1);
   }
   return a;
@@ -214,7 +214,7 @@ cl_event* cl_event_val(value v)
   for (i = 0; Is_block(v); i++)
   {
     assert(Tag_val(v) == 0);
-    e[i] = (cl_event) Nativeint_val(Field(v, 0));
+    e[i] = (cl_event) Field(v, 0);
     v = Field(v, 1);
   }
   return e;
@@ -244,7 +244,7 @@ value val_cl_program_binary_type(cl_program_binary_type t)
   }
 }
 
-value val_nativeint_list(long* a, size_t l)
+value val_ptr_list(void** a, size_t l)
 {
   CAMLlocal2(h, new_h);
   size_t i;
@@ -253,7 +253,7 @@ value val_nativeint_list(long* a, size_t l)
   for (i = 0; i < l; i++)
   {
     new_h = caml_alloc_tuple(2);
-    Store_field(new_h, 0, caml_copy_nativeint((long) a[i]));
+    Store_field(new_h, 0, (value) a[i]);
     Store_field(new_h, 1, h);
     h = new_h;
   }
@@ -316,7 +316,7 @@ value caml_get_platform_ids(value unit)
     free(platforms);
   raise_cl_error(errcode);
   caml_acquire_runtime_system();
-  caml_platforms = val_nativeint_list((long*) platforms, num_platforms);
+  caml_platforms = val_ptr_list((void**) platforms, num_platforms);
   free(platforms);
   
   CAMLreturn(caml_platforms);
@@ -333,7 +333,7 @@ value caml_get_platform_info(value caml_platform, value caml_param_name)
   char* param_value;
   cl_int errcode;
   
-  platform = (cl_platform_id) Nativeint_val(caml_platform);
+  platform = (cl_platform_id) caml_platform;
   param_name = cl_platform_info_val(caml_param_name);
   caml_release_runtime_system();
   raise_cl_error(
@@ -362,7 +362,7 @@ value caml_get_device_ids(value caml_platform, value caml_device_type)
   cl_device_id* devices;
   cl_int errcode;
 
-  platform = (cl_platform_id) Nativeint_val(caml_platform);
+  platform = (cl_platform_id) caml_platform;
   device_type = cl_device_type_val(caml_device_type);
   caml_release_runtime_system();
   raise_cl_error(clGetDeviceIDs(platform, device_type, 0, NULL, &num_devices));
@@ -372,7 +372,7 @@ value caml_get_device_ids(value caml_platform, value caml_device_type)
     free(devices);
   raise_cl_error(errcode);
   caml_acquire_runtime_system();
-  caml_devices = val_nativeint_list((long*) devices, num_devices);
+  caml_devices = val_ptr_list((void**) devices, num_devices);
   free(devices);
   
   CAMLreturn(caml_devices);
@@ -389,7 +389,7 @@ value caml_get_device_info(value caml_device, value caml_param_name)
   void* param_value;
   cl_int errcode;
   
-  device = (cl_device_id) Nativeint_val(caml_device);
+  device = (cl_device_id) caml_device;
   param_name = Int_val(caml_param_name);
   caml_release_runtime_system();
   raise_cl_error(
@@ -447,7 +447,7 @@ cl_context_properties* cl_context_properties_val(value v)
     caml_val = Field(h, 0);
     switch (Tag_val(h))
     {
-      case 0: p = CL_CONTEXT_PLATFORM; val = Nativeint_val(caml_val);
+      case 0: p = CL_CONTEXT_PLATFORM; val = caml_val;
         break;
       case 1: p = CL_CONTEXT_INTEROP_USER_SYNC; val = Bool_val(caml_val); break;
       default: caml_failwith("unrecognized context properties");
@@ -478,7 +478,7 @@ value caml_create_context(value caml_properties, value caml_devices)
     caml_failwith("calloc error");
   for (i = 0; Is_block(caml_devices); i++)
   {
-    devices[i] = (cl_device_id) Nativeint_val(Field(caml_devices, 0));
+    devices[i] = (cl_device_id) Field(caml_devices, 0);
     caml_devices = Field(caml_devices, 1);
   }
   caml_release_runtime_system();
@@ -487,7 +487,7 @@ value caml_create_context(value caml_properties, value caml_devices)
   free(devices);
   raise_cl_error(errcode);
   caml_acquire_runtime_system();
-  caml_context = caml_copy_nativeint((long) context);
+  caml_context = (value) context;
   
   CAMLreturn(caml_context);
 }
@@ -504,14 +504,14 @@ value caml_create_command_queue(value caml_context, value caml_device,
   cl_int errcode;
   cl_command_queue command_queue;
   
-  context = (cl_context) Nativeint_val(caml_context);
-  device = (cl_device_id) Nativeint_val(caml_device);
+  context = (cl_context) caml_context;
+  device = (cl_device_id) caml_device;
   properties = cl_command_queue_properties_val(caml_properties);
   caml_release_runtime_system();
   command_queue = clCreateCommandQueue(context, device, properties, &errcode);
   raise_cl_error(errcode);
   caml_acquire_runtime_system();
-  caml_command_queue = caml_copy_nativeint((long) command_queue);
+  caml_command_queue = (value) command_queue;
   
   CAMLreturn(caml_command_queue);
 }
@@ -527,7 +527,7 @@ value caml_create_program_with_source(value caml_context, value caml_strings)
   cl_int errcode;
   cl_program program;
   
-  context = (cl_context) Nativeint_val(caml_context);
+  context = (cl_context) caml_context;
   count = list_length(caml_strings);
   strings = char_array_array_val(caml_strings);
   caml_release_runtime_system();
@@ -535,7 +535,7 @@ value caml_create_program_with_source(value caml_context, value caml_strings)
   free(strings);
   raise_cl_error(errcode);
   caml_acquire_runtime_system();
-  caml_program = caml_copy_nativeint((long) program);
+  caml_program = (value) program;
   
   CAMLreturn(caml_program);
 }
@@ -550,7 +550,7 @@ value caml_build_program(value caml_program, value caml_devices, value caml_opti
   const char *options;
   cl_int errcode;
   
-  program = (cl_program) Nativeint_val(caml_program);
+  program = (cl_program) caml_program;
   num_devices = list_length(caml_devices);
   device_list = cl_device_id_val(caml_devices);
   options = String_val(caml_options);
@@ -576,8 +576,8 @@ value caml_get_program_build_info(value caml_program, value caml_device,
   void *param_value;
   cl_int errcode;
   
-  program = (cl_program) Nativeint_val(caml_program);
-  device = (cl_device_id) Nativeint_val(caml_device);
+  program = (cl_program) caml_program;
+  device = (cl_device_id) caml_device;
   param_name = (cl_program_build_info) Int_val(caml_param_name);
   caml_release_runtime_system();
   raise_cl_error(clGetProgramBuildInfo(program, device, param_name, 0, NULL,
@@ -618,13 +618,13 @@ value caml_create_kernel(value caml_program, value caml_kernel_name)
   cl_int errcode;
   cl_kernel kernel;
   
-  program = (cl_program) Nativeint_val(caml_program);
+  program = (cl_program) caml_program;
   kernel_name = String_val(caml_kernel_name);
   caml_release_runtime_system();
   kernel = clCreateKernel(program, kernel_name, &errcode);
   raise_cl_error(errcode);
   caml_acquire_runtime_system();
-  caml_kernel = caml_copy_nativeint((long) kernel);
+  caml_kernel = (value) kernel;
   
   CAMLreturn(caml_kernel);
 }
@@ -668,7 +668,7 @@ value caml_create_buffer(value caml_context, value caml_flags, value caml_src)
   cl_int errcode;
   cl_mem mem;
   
-  context = (cl_context) Nativeint_val(caml_context);
+  context = (cl_context) caml_context;
   flags = cl_mem_flags_val(caml_flags);
   switch (Tag_val(caml_src))
   {
@@ -687,7 +687,7 @@ value caml_create_buffer(value caml_context, value caml_flags, value caml_src)
   mem = clCreateBuffer(context, flags, size, host_ptr, &errcode);
   raise_cl_error(errcode);
   caml_acquire_runtime_system();
-  caml_mem = caml_copy_nativeint((long) mem);
+  caml_mem = (value) mem;
   
   CAMLreturn(caml_mem);
 }
@@ -741,7 +741,7 @@ value caml_set_kernel_arg(value caml_kernel, value caml_arg_index,
   void *arg_value;
   int kind;
   
-  kernel = (cl_kernel) Nativeint_val(caml_kernel);
+  kernel = (cl_kernel) caml_kernel;
   arg_index = Int_val(caml_arg_index);
   data = Field(caml_arg_value, 0);
   switch (Tag_val(caml_arg_value))
@@ -755,7 +755,7 @@ value caml_set_kernel_arg(value caml_kernel, value caml_arg_index,
       break;
     case 1:
       arg_size = sizeof(cl_mem);
-      ((long*) buf)[0] = Nativeint_val(data);
+      ((long*) buf)[0] = data;
       arg_value = buf;
       break;
     case 2:
@@ -794,8 +794,8 @@ value caml_enqueue_nd_range_kernel_native(
   cl_event *event_wait_list, event;
   cl_int errcode;
   
-  command_queue = (cl_command_queue) Nativeint_val(caml_command_queue);
-  kernel = (cl_kernel) Nativeint_val(caml_kernel);
+  command_queue = (cl_command_queue) caml_command_queue;
+  kernel = (cl_kernel) caml_kernel;
   
   size_t_array_val(caml_global_work_size, &global_work_size, &i);
   work_dim = i;
@@ -825,7 +825,7 @@ value caml_enqueue_nd_range_kernel_native(
   }
   raise_cl_error(errcode);
   caml_acquire_runtime_system();
-  caml_event = caml_copy_nativeint((long) event);
+  caml_event = (value) event;
   
   CAMLreturn(caml_event);
 }
@@ -856,8 +856,8 @@ value caml_enqueue_read_buffer_native(value caml_command_queue,
   cl_event event;
   cl_int errcode;
 
-  command_queue = (cl_command_queue) Nativeint_val(caml_command_queue);
-  buffer = (cl_mem) Nativeint_val(caml_buffer);
+  command_queue = (cl_command_queue) caml_command_queue;
+  buffer = (cl_mem) caml_buffer;
   blocking_read = Val_int(caml_blocking_read);
   
   array_val(caml_genarray, &ptr, &size, &element_size);
@@ -879,7 +879,7 @@ value caml_enqueue_read_buffer_native(value caml_command_queue,
     free(event_wait_list);
   raise_cl_error(errcode);
   caml_acquire_runtime_system();
-  caml_event = caml_copy_nativeint((long) event);
+  caml_event = (value) event;
   
   CAMLreturn(caml_event);
 }
@@ -910,8 +910,8 @@ value caml_enqueue_write_buffer_native(value caml_command_queue,
   cl_event event;
   cl_int errcode;
 
-  command_queue = (cl_command_queue) Nativeint_val(caml_command_queue);
-  buffer = (cl_mem) Nativeint_val(caml_buffer);
+  command_queue = (cl_command_queue) caml_command_queue;
+  buffer = (cl_mem) caml_buffer;
   blocking_write = Val_int(caml_blocking_write);
   
   array_val(caml_genarray, &ptr, &size, &element_size);
@@ -933,7 +933,7 @@ value caml_enqueue_write_buffer_native(value caml_command_queue,
     free(event_wait_list);
   raise_cl_error(errcode);
   caml_acquire_runtime_system();
-  caml_event = caml_copy_nativeint((long) event);
+  caml_event = (value) event;
   
   CAMLreturn(caml_event);
 }
@@ -951,7 +951,7 @@ value caml_release_kernel(value caml_kernel)
   
   cl_kernel kernel;
   
-  kernel = (cl_kernel) Nativeint_val(caml_kernel);
+  kernel = (cl_kernel) caml_kernel;
   caml_release_runtime_system();
   raise_cl_error(clReleaseKernel(kernel));
   caml_acquire_runtime_system();
@@ -965,7 +965,7 @@ value caml_release_command_queue(value caml_command_queue)
   
   cl_command_queue command_queue;
   
-  command_queue = (cl_command_queue) Nativeint_val(caml_command_queue);
+  command_queue = (cl_command_queue) caml_command_queue;
   caml_release_runtime_system();
   raise_cl_error(clReleaseCommandQueue(command_queue));
   caml_acquire_runtime_system();
@@ -979,7 +979,7 @@ value caml_release_context(value caml_context)
   
   cl_context context;
   
-  context = (cl_context) Nativeint_val(caml_context);
+  context = (cl_context) caml_context;
   caml_release_runtime_system();
   raise_cl_error(clReleaseContext(context));
   caml_acquire_runtime_system();
@@ -993,7 +993,7 @@ value caml_release_mem_object(value caml_memobj)
   
   cl_mem memobj;
   
-  memobj = (cl_mem) Nativeint_val(caml_memobj);
+  memobj = (cl_mem) caml_memobj;
   caml_release_runtime_system();
   raise_cl_error(clReleaseMemObject(memobj));
   caml_acquire_runtime_system();
@@ -1007,7 +1007,7 @@ value caml_release_program(value caml_program)
   
   cl_program program;
   
-  program = (cl_program) Nativeint_val(caml_program);
+  program = (cl_program) caml_program;
   caml_release_runtime_system();
   raise_cl_error(clReleaseProgram(program));
   caml_acquire_runtime_system();
@@ -1021,7 +1021,7 @@ value caml_release_event(value caml_event)
   
   cl_event event;
   
-  event = (cl_event) Nativeint_val(caml_event);
+  event = (cl_event) caml_event;
   caml_release_runtime_system();
   raise_cl_error(clReleaseEvent(event));
   caml_acquire_runtime_system();
