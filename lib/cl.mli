@@ -162,7 +162,7 @@ module Device_info : sig
   val queue_properties                  : unit t
   val name                              : string t
   val vendor                            : unit t
-  val version                           : unit t
+  val driver_version                    : unit t
   val profile                           : unit t
   val version                           : unit t
   val extensions                        : unit t
