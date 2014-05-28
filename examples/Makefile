@@ -2,8 +2,8 @@ CAMLDEP=ocamldep
 CAMLOPT=ocamlopt
 
 COMPFLAGS=-I ../lib
-LINKFLAGS=$(COMPFLAGS) bigarray.cmxa opencl.cmxa
-TARGETS=test.exe
+LINKFLAGS=$(COMPFLAGS) unix.cmxa bigarray.cmxa opencl.cmxa
+TARGETS=sync.exe test.exe
 
 .SUFFIXES: .exe .ml .mli .cmi .cmx
 
