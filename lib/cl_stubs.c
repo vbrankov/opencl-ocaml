@@ -708,9 +708,9 @@ void set_bigarray_value(void* ptr, int offset, int kind, value val)
   case CAML_BA_UINT16:
     ((caml_ba_int16 *) ptr)[offset] = Int_val(val); break;
   case CAML_BA_INT32:
-    ((int32 *) ptr)[offset] = Int32_val(val); break;
+    ((int32_t *) ptr)[offset] = Int32_val(val); break;
   case CAML_BA_INT64:
-    ((int64 *) ptr)[offset] = Int64_val(val); break;
+    ((int64_t *) ptr)[offset] = Int64_val(val); break;
   case CAML_BA_NATIVE_INT:
     ((intnat *) ptr)[offset] = Nativeint_val(val); break;
   case CAML_BA_CAML_INT:

@@ -1,11 +1,9 @@
-include ../Makefile.config
-
 CAMLDEP=ocamldep
 CAMLOPT=ocamlopt
 MKLIB=ocamlmklib
 
-CFLAGS=-I $(OPENCL_INCLUDE_DIR) -ccopt "-Wall -pedantic -Wextra -Wunused -Werror \
-  -Wno-long-long -std=c99 -DCAML_NAME_SPACE -fPIC"
+CFLAGS=-ccopt "-Wall -pedantic -Wextra -Wunused -Werror -Wno-long-long -std=c99 \
+  -DCAML_NAME_SPACE -fPIC"
 
 LIBNAME=opencl
 FOR_PACK_NAME=Opencl
@@ -20,8 +18,7 @@ $(LIBNAME).cmx: $(SRC:.mli=.cmx)
 	$(CAMLOPT) $^ -pack -o $(LIBNAME).cmx
 
 $(LIBNAME).cmxa: $(LIBNAME).cmx $(SRC_C:.c=.o)
-	$(MKLIB) $^ -o $(LIBNAME)
-	$(MKLIB) -L$(OPENCL_LIB_DIR) -lOpenCL $^ -o $(LIBNAME)
+	$(MKLIB) -lOpenCL $^ -o $(LIBNAME)
 
 depend:
 	gcc -I .. -MM *.c > .depend
