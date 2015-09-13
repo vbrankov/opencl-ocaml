@@ -1,0 +1,31 @@
+# OASIS_START
+# DO NOT EDIT (digest: 13157ddd6eaf204fbb09c9fc4f0836da)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
+# useless stuff for the build process
+true: annot, bin_annot
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library opencl
+"lib/opencl.cmxs": use_opencl
+"lib/cl.cmx": for-pack(Opencl)
+<lib/opencl.{cma,cmxa}>: oasis_library_opencl_cclib
+"lib/libopencl_stubs.lib": oasis_library_opencl_cclib
+"lib/dllopencl_stubs.dll": oasis_library_opencl_cclib
+"lib/libopencl_stubs.a": oasis_library_opencl_cclib
+"lib/dllopencl_stubs.so": oasis_library_opencl_cclib
+<lib/opencl.{cma,cmxa}>: use_libopencl_stubs
+# Executable test
+<examples/test.{native,byte}>: pkg_bigarray
+<examples/test.{native,byte}>: use_opencl
+<examples/*.ml{,i,y}>: pkg_bigarray
+<examples/*.ml{,i,y}>: use_opencl
+# OASIS_STOP

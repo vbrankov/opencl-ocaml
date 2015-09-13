@@ -1,0 +1,23 @@
+OASISFormat: 0.4
+Name:        OpenCL
+Version:     0.1
+Synopsis:    OCaml wrapper for OpenCL library
+Authors:     Vladimir Brankov <brankovv@gmail.com>
+License:     MIT
+Plugins:     META (0.4)
+
+Library opencl
+  Path:       lib
+  BuildTools: ocamlbuild
+  Pack:       true
+  Modules:    Cl
+  CSources:   cl_stubs.c
+  CClib:      -lOpenCL
+  
+Executable test
+  Path:           examples
+  BuildTools:     ocamlbuild
+  MainIs:         test.ml
+  BuildDepends:   bigarray, opencl
+  Install:        false
+  CompiledObject: best

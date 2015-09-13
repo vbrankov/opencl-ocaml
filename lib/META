@@ -1,0 +1,11 @@
+# OASIS_START
+# DO NOT EDIT (digest: 0e6a53d2f28bf68baecd7d0a13408513)
+version = "0.1"
+description = "OCaml wrapper for OpenCL library"
+archive(byte) = "opencl.cma"
+archive(byte, plugin) = "opencl.cma"
+archive(native) = "opencl.cmxa"
+archive(native, plugin) = "opencl.cmxs"
+exists_if = "opencl.cma"
+# OASIS_STOP
+
