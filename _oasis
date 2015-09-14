@@ -4,7 +4,7 @@ Version:     0.1
 Synopsis:    OCaml wrapper for OpenCL library
 Authors:     Vladimir Brankov <brankovv@gmail.com>
 License:     MIT
-Plugins:     META (0.4)
+Plugins:     META (0.4), DevFiles (0.4)
 
 Library opencl
   Path:       lib
