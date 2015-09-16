@@ -1,0 +1,20 @@
+opam-version: "1.2"
+name: "opencl"
+version: "0.1"
+maintainer: "Vladimir Brankov <vbrankov@janestreet.com>"
+authors: "Vladimir Brankov <vbrankov@janestreet.com>"
+homepage: "https://github.com/vbrankov/opencl-ocaml"
+bug-reports: "https://github.com/vbrankov/opencl-ocaml/issues"
+license: "MIT"
+dev-repo: "git@github.com:vbrankov/opencl-ocaml.git"
+build: [
+  ["./configure" "--prefix=%{prefix}%"]
+  [make]
+]
+install: [make "install"]
+remove: [
+  ["ocamlfind" "remove" "opencl"]
+]
+depends: [
+  "ocamlfind" {build}
+]
